@@ -1,0 +1,6104 @@
+openapi: 3.1.1
+info:
+  title: Aig LMS API
+  description: E-Learning Management System — Backend API
+  version: v1
+servers:
+  - url: http://localhost:8080/
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Overall health status
+      responses:
+        "200":
+          description: OK
+  /health/live:
+    get:
+      tags:
+        - Health
+      summary: Liveness — app is running
+      responses:
+        "200":
+          description: OK
+  /health/ready:
+    get:
+      tags:
+        - Health
+      summary: Readiness — app is ready to serve traffic
+      responses:
+        "200":
+          description: OK
+  /api/identity/identify:
+    post:
+      tags:
+        - Identity
+      summary: Identifier-first lookup — returns nextStep and tenant branding; always
+        responds without revealing user existence
+      operationId: Identify
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IdentifyRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdentifyResult"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdentifyError"
+  /api/tenants/resolve:
+    get:
+      tags:
+        - Aig.Lms.Api
+      summary: Resolve tenant branding from a domain or host
+      operationId: ResolveTenantByDomain
+      parameters:
+        - name: domain
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResolveTenantResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/admin/schools/{schoolId}/users:
+    get:
+      tags:
+        - Schools
+        - Users
+      summary: List users belonging to a school
+      operationId: GetSchoolUsers
+      parameters:
+        - name: schoolId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          required: true
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: pageSize
+          in: query
+          required: true
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: accountType
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserListResult"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/admin/subscriptions:
+    get:
+      tags:
+        - Schools
+      summary: List subscriptions by scope with optional tenantId, schoolId, status
+        and pagination filters
+      operationId: ListSubscriptionsByScope
+      parameters:
+        - name: tenantId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: schoolId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: true
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: pageSize
+          in: query
+          required: true
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubscriptionListResult"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "403":
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/identity/auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Login — returns JWT access token + refresh token
+      operationId: Login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginCommand"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResult"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginError"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginError"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginError"
+        "429":
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginError"
+  /api/identity/auth/refresh:
+    post:
+      tags:
+        - Auth
+      summary: Exchange a valid refresh token for a new access token + rotated refresh
+        token
+      operationId: RefreshToken
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshTokenRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResult"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginError"
+  /api/identity/auth/logout:
+    post:
+      tags:
+        - Auth
+      summary: Revoke the refresh token session (logout)
+      operationId: Logout
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LogoutRequest"
+        required: true
+      responses:
+        "204":
+          description: No Content
+  /api/identity/auth/change-password:
+    post:
+      tags:
+        - Auth
+      summary: Change the current user's password — revokes all other active sessions
+      operationId: ChangePassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangePasswordRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/identity/auth/reset-password:
+    post:
+      tags:
+        - Auth
+      summary: Admin reset a user's password — revokes all sessions, forces re-login
+      operationId: ResetPassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResetPasswordRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/identity/auth/sessions:
+    get:
+      tags:
+        - Auth
+      summary: List all active sessions for the current user
+      operationId: GetMySessions
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SessionDto"
+    delete:
+      tags:
+        - Auth
+      summary: Logout everywhere — revoke all other active sessions, keep current
+        session
+      operationId: RevokeAllOtherSessions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RevokeAllOtherSessionsRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+  /api/identity/auth/sessions/{sessionId}:
+    delete:
+      tags:
+        - Auth
+      summary: Revoke one of the current user's own sessions
+      operationId: RevokeMySession
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/identity/auth/admin/sessions/{userId}:
+    get:
+      tags:
+        - Auth
+      summary: "Admin: list sessions for any user (active or full history)"
+      operationId: AdminGetUserSessions
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: activeOnly
+          in: query
+          required: true
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SessionDto"
+  /api/identity/auth/admin/sessions/{sessionId}:
+    delete:
+      tags:
+        - Auth
+      summary: "Admin: force-revoke any user session"
+      operationId: AdminRevokeSession
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/identity/auth/admin/sessions/users/{userId}:
+    delete:
+      tags:
+        - Auth
+      summary: "Admin: force-revoke ALL active sessions for a specific user"
+      operationId: AdminRevokeAllUserSessions
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/identity/workspaces:
+    get:
+      tags:
+        - Identity
+      summary: List all accessible workspaces (tenants) for the current user
+      operationId: GetWorkspaces
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WorkspaceDto"
+  /api/identity/workspaces/{tenantId}/select:
+    post:
+      tags:
+        - Identity
+      summary: Switch active workspace — rotates refresh token, returns new access
+        token scoped to selected tenant
+      operationId: SelectWorkspace
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SelectWorkspaceRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResult"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginError"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginError"
+  /api/admin/tenants:
+    get:
+      tags:
+        - Admin Tenants
+      summary: List tenants with optional status and search filters
+      operationId: GetTenants
+      parameters:
+        - name: page
+          in: query
+          required: true
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: pageSize
+          in: query
+          required: true
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetTenantsResult"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+    post:
+      tags:
+        - Admin Tenants
+      summary: Create a new tenant with branding settings
+      operationId: CreateTenant
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTenantCommand"
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateTenantResult"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "409":
+          description: Conflict
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/admin/tenants/{id}:
+    get:
+      tags:
+        - Admin Tenants
+      summary: Get tenant details by ID
+      operationId: GetTenantById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TenantDto"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+    put:
+      tags:
+        - Admin Tenants
+      summary: Update tenant information and branding
+      operationId: UpdateTenant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTenantRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateTenantResult"
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/admin/tenants/{id}/status:
+    patch:
+      tags:
+        - Admin Tenants
+      summary: "Change tenant status: ACTIVE | INACTIVE | LOCKED"
+      operationId: ChangeTenantStatus
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangeTenantStatusRequest"
+        required: true
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/admin/users/{id}:
+    get:
+      tags:
+        - Users
+      summary: Get a user by ID
+      operationId: GetUserById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+    put:
+      tags:
+        - Users
+      summary: Update user profile (fullName, email, status)
+      operationId: UpdateUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateUserResult"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+    delete:
+      tags:
+        - Users
+      summary: Soft-delete a user (is_deleted = true, status = DELETED) — irreversible
+        via API
+      operationId: DeleteUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/admin/users:
+    get:
+      tags:
+        - Users
+      summary: "List users with optional filters: school, tenant, role, accountType,
+        status, search"
+      operationId: ListUsers
+      parameters:
+        - name: schoolId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: tenantId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: roleId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: accountType
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: true
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: pageSize
+          in: query
+          required: true
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserListResult"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+    post:
+      tags:
+        - Users
+      summary: Create a new user for a school
+      operationId: CreateUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserRequest"
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateUserResult"
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "409":
+          description: Conflict
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/admin/users/{id}/status:
+    patch:
+      tags:
+        - Users
+      summary: "Change user status: ACTIVE | INACTIVE | LOCKED | DISABLED"
+      operationId: ChangeUserStatus
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangeStatusRequest"
+        required: true
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/admin/users/{id}/avatar:
+    patch:
+      tags:
+        - Users
+      summary: Update user avatar URL
+      operationId: UpdateAvatar
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAvatarRequest"
+        required: true
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/admin/users/{id}/reset-password:
+    post:
+      tags:
+        - Users
+      summary: Admin resets a user's password. Also clears failed login count and lock.
+      operationId: ResetUserPassword
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResetPasswordRequest"
+        required: true
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/admin/users/import/template:
+    get:
+      tags:
+        - Users
+      summary: Download the standard Excel template for bulk user import
+      operationId: GetImportTemplate
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IResult"
+  /api/admin/users/import:
+    post:
+      tags:
+        - Users
+      summary: Bulk import users from an Excel file (.xlsx). Returns per-row
+        success/failure report.
+      operationId: BulkImportUsers
+      parameters:
+        - name: schoolId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: tenantId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BulkImportUsersResult"
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/admin/users/{id}/tenants:
+    get:
+      tags:
+        - Users
+      summary: List tenant assignments for a user (inherited + manual)
+      operationId: GetUserTenants
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserTenantDto"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+    post:
+      tags:
+        - Users
+      summary: Manually assign a tenant+role to a user
+      operationId: AssignUserTenant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssignUserTenantRequest"
+        required: true
+      responses:
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "409":
+          description: Conflict
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/admin/users/{id}/tenants/{tenantId}:
+    delete:
+      tags:
+        - Users
+      summary: Revoke a tenant assignment from a user
+      operationId: RemoveUserTenant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/admin/tenants/{tenantId}/members:
+    get:
+      tags:
+        - Users
+      summary: List all users assigned to a tenant with their roles (for the tenant
+        role management screen)
+      operationId: GetTenantMembers
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+            default: 20
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: {}
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/admin/audit-logs:
+    get:
+      tags:
+        - Audit Logs
+      summary: List audit logs
+      description: Get paginated list of audit logs with optional filters (tenant,
+        school, user, action, date range)
+      operationId: ListAuditLogs
+      parameters:
+        - name: tenantId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: schoolId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: userId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: action
+          in: query
+          schema:
+            type: string
+        - name: fromDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: toDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: page
+          in: query
+          required: true
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: pageSize
+          in: query
+          required: true
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetAuditLogsResult"
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/admin/audit-logs/export:
+    get:
+      tags:
+        - Audit Logs
+      summary: Export audit logs
+      description: Export audit logs matching the same filters as list endpoint to a
+        CSV file
+      operationId: ExportAuditLogs
+      parameters:
+        - name: tenantId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: schoolId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: userId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: action
+          in: query
+          schema:
+            type: string
+        - name: fromDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: toDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/authorization/roles:
+    get:
+      tags:
+        - Authorization
+      summary: List all available roles (PLATFORM / TENANT / SCHOOL scope)
+      operationId: ListRoles
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Role"
+  /api/authorization/users/{userId}/roles:
+    get:
+      tags:
+        - Authorization
+      summary: Get all active role assignments for a user
+      operationId: GetUserRoles
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserTenantRoleAssignment"
+    post:
+      tags:
+        - Authorization
+      summary: Assign a role to a user (optionally scoped to a tenant or school)
+      operationId: AssignRole
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssignRoleRequest"
+        required: true
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/authorization/users/{userId}/roles/{roleId}:
+    delete:
+      tags:
+        - Authorization
+      summary: Revoke a role assignment from a user
+      operationId: RevokeRole
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: roleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: tenantId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/authorization/permissions:
+    get:
+      tags:
+        - Authorization
+      summary: List all available permissions grouped by module
+      operationId: ListPermissions
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Permission"
+  /api/authorization/roles/{roleId}/permissions:
+    get:
+      tags:
+        - Authorization
+      summary: Get all permissions assigned to a specific role
+      operationId: GetRolePermissions
+      parameters:
+        - name: roleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Permission"
+  /api/admin/roles:
+    get:
+      tags:
+        - Admin
+      summary: List all roles with their assigned permission codes
+      operationId: AdminListRoles
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RoleWithPermissions"
+  /api/admin/users/{userId}/permissions:
+    get:
+      tags:
+        - Admin
+      summary: Get effective permission codes for a user derived from their active
+        role assignments
+      operationId: GetUserEffectivePermissions
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPermissionsResult"
+  /api/admin/schools:
+    get:
+      tags:
+        - Schools
+      summary: List schools with optional status/search filter
+      operationId: ListSchools
+      parameters:
+        - name: page
+          in: query
+          required: true
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: pageSize
+          in: query
+          required: true
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SchoolListResult"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+    post:
+      tags:
+        - Schools
+      summary: Create a new school
+      operationId: CreateSchool
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSchoolRequest"
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateSchoolResult"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "409":
+          description: Conflict
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/admin/schools/{id}:
+    get:
+      tags:
+        - Schools
+      summary: Get a school by ID
+      operationId: GetSchoolById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/School"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+    put:
+      tags:
+        - Schools
+      summary: Update school information
+      operationId: UpdateSchool
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSchoolRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateSchoolResult"
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/admin/schools/{id}/status:
+    patch:
+      tags:
+        - Schools
+      summary: "Change school status: ACTIVE | INACTIVE | LOCKED"
+      operationId: ChangeSchoolStatus
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangeSchoolStatusRequest"
+        required: true
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/admin/schools/{schoolId}/subscriptions:
+    get:
+      tags:
+        - Schools
+      summary: List all tenant subscriptions for a school
+      operationId: ListSubscriptions
+      parameters:
+        - name: schoolId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SubscriptionDto"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+    post:
+      tags:
+        - Schools
+      summary: Create tenant subscriptions for a school (one row per selected tenant)
+      operationId: CreateSubscriptions
+      parameters:
+        - name: schoolId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSubscriptionRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateSubscriptionsBulkResult"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "409":
+          description: Conflict
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/admin/schools/{schoolId}/subscriptions/{id}:
+    put:
+      tags:
+        - Schools
+      summary: Update a tenant subscription for a school
+      operationId: UpdateSubscription
+      parameters:
+        - name: schoolId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSubscriptionRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateSubscriptionResult"
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+    delete:
+      tags:
+        - Schools
+      summary: Delete a tenant subscription for a school
+      operationId: DeleteSubscription
+      parameters:
+        - name: schoolId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/admin/catalog/{type}:
+    get:
+      tags:
+        - Admin Catalog
+      summary: List all active catalog items for a given type
+      operationId: GetCatalogByType
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CatalogItemDto"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+    post:
+      tags:
+        - Admin Catalog
+      summary: Create a new catalog item for a given type
+      operationId: CreateCatalogItem
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCatalogItemRequest"
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateCatalogItemResult"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "409":
+          description: Conflict
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/admin/catalog/{type}/{id}:
+    put:
+      tags:
+        - Admin Catalog
+      summary: Update a catalog item's name, description, and sort order
+      operationId: UpdateCatalogItem
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCatalogItemRequest"
+        required: true
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "409":
+          description: Conflict
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+    delete:
+      tags:
+        - Admin Catalog
+      summary: Soft-delete a catalog item (blocked if system item or in use)
+      operationId: DeleteCatalogItem
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "409":
+          description: Conflict
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/tenants/{tenantId}/permissions:
+    get:
+      tags:
+        - Content Permissions
+      summary: List content permissions by tenant with optional filters
+      operationId: ListContentPermissions
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: curriculumNodeId
+          in: query
+          schema:
+            type: string
+        - name: schoolId
+          in: query
+          schema:
+            type: string
+        - name: userId
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ContentPermissionDto"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "403":
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+    post:
+      tags:
+        - Content Permissions
+      summary: Grant content permissions on a curriculum node to a school or user
+      operationId: GrantContentPermission
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GrantContentPermissionRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GrantContentPermissionResult"
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "403":
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/tenants/{tenantId}/permissions/{permissionId}:
+    delete:
+      tags:
+        - Content Permissions
+      summary: Revoke a content permission
+      operationId: DeleteContentPermission
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: permissionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "403":
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/tenants/{tenantId}/curriculum/{nodeId}/permissions:
+    get:
+      tags:
+        - Content Permissions
+      summary: List direct and inherited permissions effective on a curriculum node
+      operationId: ListNodePermissions
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/NodePermissionViewDto"
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "403":
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/tenants/{tenantId}/users/{userId}/permissions:
+    get:
+      tags:
+        - Content Permissions
+      summary: List effective curriculum permissions for a user in tenant context
+      operationId: ListUserEffectivePermissions
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserEffectiveNodePermissionDto"
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "403":
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/tenants/{tenantId}/contents:
+    get:
+      tags:
+        - Contents
+      summary: List content items with optional filters
+      operationId: ListContents
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: nodeId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: type
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+            default: 20
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PagedResultOfContentListItem"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "403":
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+    post:
+      tags:
+        - Contents
+      summary: Create a content item and get a presigned upload URL
+      operationId: CreateContent
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateContentRequest"
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateContentResult"
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "403":
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/tenants/{tenantId}/contents/{contentId}:
+    get:
+      tags:
+        - Contents
+      summary: Get a single content item
+      operationId: GetContent
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: contentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContentItemDto"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "403":
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+    put:
+      tags:
+        - Contents
+      summary: Update content metadata
+      operationId: UpdateContent
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: contentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateContentRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContentItemDto"
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "403":
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+    delete:
+      tags:
+        - Contents
+      summary: Soft-delete a content item
+      operationId: DeleteContent
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: contentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "403":
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/tenants/{tenantId}/contents/{contentId}/status:
+    patch:
+      tags:
+        - Contents
+      summary: Publish, unpublish, or archive a content item
+      operationId: UpdateContentStatus
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: contentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateContentStatusRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateContentStatusResult"
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "403":
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/tenants/{tenantId}/contents/{contentId}/processing-status:
+    get:
+      tags:
+        - Contents
+      summary: Get video processing status for a content item
+      operationId: GetContentProcessingStatus
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: contentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContentProcessingStatusDto"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "403":
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/tenants/{tenantId}/contents/{contentId}/reprocess:
+    post:
+      tags:
+        - Contents
+      summary: Manually requeue video processing for a content item
+      operationId: ReprocessContentVideo
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: contentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "202":
+          description: Accepted
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "403":
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "422":
+          description: Unprocessable Entity
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/tenants/{tenantId}/contents/{contentId}/upload:
+    post:
+      tags:
+        - Contents
+      summary: Confirm upload and persist verified metadata from object storage
+      operationId: ConfirmUpload
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: contentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConfirmUploadRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfirmUploadResult"
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "403":
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/tenants/{tenantId}/curriculum:
+    get:
+      tags:
+        - Curriculum
+      summary: Get full curriculum tree for a tenant
+      operationId: GetCurriculumTree
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CurriculumTreeNode"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "403":
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+    post:
+      tags:
+        - Curriculum
+      summary: Create a curriculum node
+      operationId: CreateCurriculumNode
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCurriculumNodeRequest"
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateCurriculumNodeResult"
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "403":
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/tenants/{tenantId}/curriculum/{nodeId}/children:
+    get:
+      tags:
+        - Curriculum
+      summary: Get direct child nodes for a curriculum node
+      operationId: GetCurriculumChildren
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CurriculumNodeDto"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "403":
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/tenants/{tenantId}/curriculum/{nodeId}:
+    put:
+      tags:
+        - Curriculum
+      summary: Update curriculum node metadata
+      operationId: UpdateCurriculumNode
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCurriculumNodeRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CurriculumNodeDto"
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "403":
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+    delete:
+      tags:
+        - Curriculum
+      summary: Delete curriculum node (validated)
+      operationId: DeleteCurriculumNode
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "403":
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/tenants/{tenantId}/curriculum/reorder:
+    patch:
+      tags:
+        - Curriculum
+      summary: Reorder sibling curriculum nodes
+      operationId: ReorderCurriculum
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReorderCurriculumRequest"
+        required: true
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "403":
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/client/curriculum:
+    get:
+      tags:
+        - ContentDelivery
+      summary: Get curriculum tree filtered by current user's effective view permissions
+      operationId: GetClientCurriculumTree
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CurriculumTreeNode"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "403":
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/client/curriculum/{nodeId}/contents:
+    get:
+      tags:
+        - ContentDelivery
+      summary: Get published contents in a curriculum node for current user
+      operationId: GetClientNodeContents
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+            default: 20
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PagedResultOfContentListItem"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "403":
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/client/curriculum/contents/{contentId}/progress:
+    get:
+      tags:
+        - ContentDelivery
+      summary: Get current user's progress for a content item
+      operationId: GetClientContentProgress
+      parameters:
+        - name: contentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContentProgressResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "403":
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+    put:
+      tags:
+        - ContentDelivery
+      summary: Create or update current user's progress for a content item
+      operationId: UpsertClientContentProgress
+      parameters:
+        - name: contentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateContentProgressRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContentProgressResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "403":
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/client/dashboard/summary:
+    get:
+      tags:
+        - ContentDelivery
+      summary: Get dashboard summary metrics for current user
+      operationId: GetClientDashboardSummary
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummaryDto"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "403":
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/client/dashboard/quick-access:
+    get:
+      tags:
+        - ContentDelivery
+      summary: "Get quick-access contents: viewed this week (non-favorite) first, then
+        favorites"
+      operationId: GetClientQuickAccess
+      parameters:
+        - name: page
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+            default: 20
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PagedResultOfQuickAccessItem"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "403":
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/client/favorites:
+    get:
+      tags:
+        - ContentDelivery
+      summary: Get favorite contents accessible to current user
+      operationId: GetClientFavorites
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FavoriteContentItem"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "403":
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/client/favorites/{contentId}:
+    post:
+      tags:
+        - ContentDelivery
+      summary: Add content to current user's favorites
+      operationId: AddClientFavorite
+      parameters:
+        - name: contentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "403":
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+    delete:
+      tags:
+        - ContentDelivery
+      summary: Remove content from current user's favorites
+      operationId: DeleteClientFavorite
+      parameters:
+        - name: contentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/client/contents/{contentId}/stream-url:
+    get:
+      tags:
+        - ContentDelivery
+      summary: Generate signed HLS stream URL for viewable VIDEO content
+      operationId: GetContentStreamUrl
+      parameters:
+        - name: contentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignedUrlResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "403":
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/client/contents/{contentId}/view-url:
+    get:
+      tags:
+        - ContentDelivery
+      summary: Generate signed document view URL for permitted PDF/SLIDE/WORD content
+      operationId: GetContentViewUrl
+      parameters:
+        - name: contentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignedUrlResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "403":
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/client/contents/{contentId}/download-url:
+    get:
+      tags:
+        - ContentDelivery
+      summary: Generate signed download URL for downloadable content
+      operationId: GetContentDownloadUrl
+      parameters:
+        - name: contentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignedUrlResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "403":
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/client/contents/{contentId}/watermark-config:
+    get:
+      tags:
+        - ContentDelivery
+      summary: Generate dynamic watermark config for permitted content
+      operationId: GetContentWatermarkConfig
+      parameters:
+        - name: contentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WatermarkConfigResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "403":
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/admin/reports/overview:
+    get:
+      tags:
+        - Reports
+      summary: Get current platform report overview
+      operationId: GetReportOverview
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Report"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /api/admin/reports/active-session:
+    get:
+      tags:
+        - Reports
+      summary: Get current active sessions
+      operationId: GetActiveSession
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActiveSessionResult"
+        "401":
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+components:
+  schemas:
+    ActiveSessionResult:
+      type: object
+      properties:
+        activeSessions:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+    AssignRoleRequest:
+      required:
+        - roleId
+        - tenantId
+      type: object
+      properties:
+        roleId:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+    AssignUserTenantRequest:
+      required:
+        - tenantId
+        - roleCode
+      type: object
+      properties:
+        tenantId:
+          type: string
+          format: uuid
+        roleCode:
+          type: string
+    AuditLogDto:
+      required:
+        - id
+        - occurredAt
+        - tenantId
+        - schoolId
+        - userId
+        - action
+        - entityType
+        - entityId
+        - metadata
+      type: object
+      properties:
+        id:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+        occurredAt:
+          type: string
+          format: date-time
+        tenantId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        schoolId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        userId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        action:
+          type: string
+        entityType:
+          type:
+            - "null"
+            - string
+        entityId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        metadata:
+          type:
+            - "null"
+            - string
+    BulkImportRowResult:
+      required:
+        - rowNumber
+        - success
+        - username
+        - error
+      type: object
+      properties:
+        rowNumber:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        success:
+          type: boolean
+        username:
+          type:
+            - "null"
+            - string
+        error:
+          type:
+            - "null"
+            - string
+    BulkImportUsersResult:
+      required:
+        - totalRows
+        - successCount
+        - failureCount
+        - rows
+      type: object
+      properties:
+        totalRows:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        successCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        failureCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/BulkImportRowResult"
+    CatalogItemDto:
+      required:
+        - id
+        - type
+        - code
+        - name
+        - description
+        - sortOrder
+        - isSystem
+        - isActive
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+        code:
+          type: string
+        name:
+          type: string
+        description:
+          type:
+            - "null"
+            - string
+        sortOrder:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        isSystem:
+          type: boolean
+        isActive:
+          type: boolean
+    ChangePasswordRequest:
+      required:
+        - currentPassword
+        - newPassword
+      type: object
+      properties:
+        currentPassword:
+          type: string
+        newPassword:
+          type: string
+        refreshToken:
+          type:
+            - "null"
+            - string
+    ChangeSchoolStatusRequest:
+      required:
+        - status
+      type: object
+      properties:
+        status:
+          type: string
+    ChangeStatusRequest:
+      required:
+        - status
+      type: object
+      properties:
+        status:
+          type: string
+    ChangeTenantStatusRequest:
+      required:
+        - status
+      type: object
+      properties:
+        status:
+          type: string
+    ConfirmUploadRequest:
+      required:
+        - fileName
+        - objectKey
+        - mimeType
+        - fileSizeBytes
+      type: object
+      properties:
+        fileName:
+          type: string
+        objectKey:
+          type: string
+        mimeType:
+          type:
+            - "null"
+            - string
+        fileSizeBytes:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int64
+    ConfirmUploadResult:
+      required:
+        - contentId
+        - type
+        - filePath
+        - mimeType
+        - fileSizeBytes
+        - updatedAt
+      type: object
+      properties:
+        contentId:
+          type: string
+          format: uuid
+        type:
+          type: string
+        filePath:
+          type: string
+        mimeType:
+          type:
+            - "null"
+            - string
+        fileSizeBytes:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+        updatedAt:
+          type: string
+          format: date-time
+    ContentItemDto:
+      required:
+        - id
+        - tenantId
+        - curriculumNodeId
+        - type
+        - title
+        - description
+        - fileName
+        - filePath
+        - hlsUrl
+        - sourceUrl
+        - mimeType
+        - fileSizeBytes
+        - publishStatus
+        - visibilityFrom
+        - visibilityTo
+        - isDownloadable
+        - watermarkEnabled
+        - signedUrlTtl
+        - mediaProcessingStatus
+        - mediaProcessingError
+        - mediaProcessingStartedAt
+        - mediaProcessingCompletedAt
+        - createdAt
+        - updatedAt
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        curriculumNodeId:
+          type: string
+          format: uuid
+        type:
+          type: string
+        title:
+          type: string
+        description:
+          type:
+            - "null"
+            - string
+        fileName:
+          type:
+            - "null"
+            - string
+        filePath:
+          type:
+            - "null"
+            - string
+        hlsUrl:
+          type:
+            - "null"
+            - string
+        sourceUrl:
+          type:
+            - "null"
+            - string
+        mimeType:
+          type:
+            - "null"
+            - string
+        fileSizeBytes:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int64
+        publishStatus:
+          type: string
+        visibilityFrom:
+          type:
+            - "null"
+            - string
+          format: date-time
+        visibilityTo:
+          type:
+            - "null"
+            - string
+          format: date-time
+        isDownloadable:
+          type: boolean
+        watermarkEnabled:
+          type: boolean
+        signedUrlTtl:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        mediaProcessingStatus:
+          type: string
+        mediaProcessingError:
+          type:
+            - "null"
+            - string
+        mediaProcessingStartedAt:
+          type:
+            - "null"
+            - string
+          format: date-time
+        mediaProcessingCompletedAt:
+          type:
+            - "null"
+            - string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ContentListItem:
+      required:
+        - id
+        - type
+        - title
+        - description
+        - fileName
+        - fileSizeBytes
+        - publishStatus
+        - visibilityFrom
+        - visibilityTo
+        - isDownloadable
+        - watermarkEnabled
+        - mediaProcessingStatus
+        - createdAt
+        - updatedAt
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+        title:
+          type: string
+        description:
+          type:
+            - "null"
+            - string
+        fileName:
+          type:
+            - "null"
+            - string
+        fileSizeBytes:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int64
+        publishStatus:
+          type: string
+        visibilityFrom:
+          type:
+            - "null"
+            - string
+          format: date-time
+        visibilityTo:
+          type:
+            - "null"
+            - string
+          format: date-time
+        isDownloadable:
+          type: boolean
+        watermarkEnabled:
+          type: boolean
+        mediaProcessingStatus:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ContentPermissionDto:
+      required:
+        - id
+        - tenantId
+        - curriculumNodeId
+        - schoolId
+        - userId
+        - canView
+        - canDownload
+        - canComment
+        - createdAt
+        - updatedAt
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        curriculumNodeId:
+          type: string
+          format: uuid
+        schoolId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        userId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        canView:
+          type: boolean
+        canDownload:
+          type: boolean
+        canComment:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ContentProcessingStatusDto:
+      required:
+        - contentId
+        - type
+        - status
+        - error
+        - startedAt
+        - completedAt
+        - hlsUrl
+      type: object
+      properties:
+        contentId:
+          type: string
+          format: uuid
+        type:
+          type: string
+        status:
+          type: string
+        error:
+          type:
+            - "null"
+            - string
+        startedAt:
+          type:
+            - "null"
+            - string
+          format: date-time
+        completedAt:
+          type:
+            - "null"
+            - string
+          format: date-time
+        hlsUrl:
+          type:
+            - "null"
+            - string
+    ContentProgressResponse:
+      required:
+        - contentId
+        - progressValue
+        - updatedAt
+      type: object
+      properties:
+        contentId:
+          type: string
+          format: uuid
+        progressValue:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+        updatedAt:
+          type:
+            - "null"
+            - string
+          format: date-time
+    CreateCatalogItemRequest:
+      required:
+        - code
+        - name
+        - description
+        - sortOrder
+      type: object
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        description:
+          type:
+            - "null"
+            - string
+        sortOrder:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+    CreateCatalogItemResult:
+      required:
+        - id
+        - type
+        - code
+        - name
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+        code:
+          type: string
+        name:
+          type: string
+    CreateContentRequest:
+      required:
+        - curriculumNodeId
+        - type
+        - title
+        - description
+        - fileName
+        - sourceUrl
+      type: object
+      properties:
+        curriculumNodeId:
+          type: string
+          format: uuid
+        type:
+          type: string
+        title:
+          type: string
+        description:
+          type:
+            - "null"
+            - string
+        fileName:
+          type:
+            - "null"
+            - string
+        sourceUrl:
+          type:
+            - "null"
+            - string
+        watermarkEnabled:
+          type: boolean
+          default: true
+        isDownloadable:
+          type: boolean
+          default: false
+        visibilityFrom:
+          type:
+            - "null"
+            - string
+          format: date-time
+        visibilityTo:
+          type:
+            - "null"
+            - string
+          format: date-time
+    CreateContentResult:
+      required:
+        - contentId
+        - uploadUrl
+        - objectKey
+        - uploadExpiresAt
+      type: object
+      properties:
+        contentId:
+          type: string
+          format: uuid
+        uploadUrl:
+          type:
+            - "null"
+            - string
+        objectKey:
+          type:
+            - "null"
+            - string
+        uploadExpiresAt:
+          type:
+            - "null"
+            - string
+          format: date-time
+    CreateCurriculumNodeRequest:
+      required:
+        - parentId
+        - nodeType
+        - code
+        - title
+      type: object
+      properties:
+        parentId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        nodeType:
+          type: string
+        code:
+          type:
+            - "null"
+            - string
+        title:
+          type: string
+        sortOrder:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+          default: 0
+    CreateCurriculumNodeResult:
+      required:
+        - nodeId
+      type: object
+      properties:
+        nodeId:
+          type: string
+          format: uuid
+    CreateSchoolRequest:
+      required:
+        - code
+        - name
+        - taxId
+        - province
+        - district
+        - address
+        - contactName
+        - contactEmail
+        - contactPhone
+        - contractStartDate
+        - contractEndDate
+      type: object
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        taxId:
+          type:
+            - "null"
+            - string
+        province:
+          type:
+            - "null"
+            - string
+        district:
+          type:
+            - "null"
+            - string
+        address:
+          type:
+            - "null"
+            - string
+        contactName:
+          type:
+            - "null"
+            - string
+        contactEmail:
+          type:
+            - "null"
+            - string
+        contactPhone:
+          type:
+            - "null"
+            - string
+        contractStartDate:
+          type:
+            - "null"
+            - string
+          format: date
+        contractEndDate:
+          type:
+            - "null"
+            - string
+          format: date
+    CreateSchoolResult:
+      required:
+        - schoolId
+        - code
+        - name
+      type: object
+      properties:
+        schoolId:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+    CreateSubscriptionRequest:
+      required:
+        - tenantIds
+        - contractStart
+        - contractEnd
+      type: object
+      properties:
+        tenantIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        contractStart:
+          type: string
+          format: date
+        contractEnd:
+          type: string
+          format: date
+        maxConcurrentSessions:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+          default: 1
+        loginPolicy:
+          type: string
+          default: BLOCK_NEW
+        enforceExpiry:
+          type: boolean
+          default: true
+    CreateSubscriptionResult:
+      required:
+        - id
+        - schoolId
+        - tenantId
+        - contractStart
+        - contractEnd
+        - maxConcurrentSessions
+        - loginPolicy
+        - enforceExpiry
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        schoolId:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        contractStart:
+          type: string
+          format: date
+        contractEnd:
+          type: string
+          format: date
+        maxConcurrentSessions:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        loginPolicy:
+          type: string
+        enforceExpiry:
+          type: boolean
+    CreateSubscriptionsBulkResult:
+      required:
+        - created
+        - skippedDuplicates
+      type: object
+      properties:
+        created:
+          type: array
+          items:
+            $ref: "#/components/schemas/CreateSubscriptionResult"
+        skippedDuplicates:
+          type: array
+          items:
+            type: string
+            format: uuid
+    CreateTenantCommand:
+      required:
+        - name
+        - code
+        - subdomain
+        - logoUrl
+        - avatarUrl
+        - description
+        - watermarkSettings
+      type: object
+      properties:
+        name:
+          type: string
+        code:
+          type: string
+        subdomain:
+          type: string
+        logoUrl:
+          type:
+            - "null"
+            - string
+        avatarUrl:
+          type:
+            - "null"
+            - string
+        description:
+          type:
+            - "null"
+            - string
+        watermarkSettings:
+          type:
+            - "null"
+            - string
+    CreateTenantResult:
+      required:
+        - tenantId
+        - code
+        - subdomain
+        - status
+      type: object
+      properties:
+        tenantId:
+          type: string
+          format: uuid
+        code:
+          type: string
+        subdomain:
+          type: string
+        status:
+          type: string
+    CreateUserRequest:
+      required:
+        - schoolId
+        - username
+        - password
+        - fullName
+        - accountType
+      type: object
+      properties:
+        schoolId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        username:
+          type: string
+        password:
+          type: string
+        fullName:
+          type: string
+        accountType:
+          type: string
+        email:
+          type:
+            - "null"
+            - string
+        avatarUrl:
+          type:
+            - "null"
+            - string
+        roleId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        tenantId:
+          type:
+            - "null"
+            - string
+          format: uuid
+    CreateUserResult:
+      required:
+        - userId
+        - username
+        - fullName
+        - email
+        - avatarUrl
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        username:
+          type: string
+        fullName:
+          type: string
+        email:
+          type:
+            - "null"
+            - string
+        avatarUrl:
+          type:
+            - "null"
+            - string
+        accountType:
+          type:
+            - "null"
+            - string
+    CurriculumNodeDto:
+      required:
+        - id
+        - tenantId
+        - parentId
+        - nodeType
+        - code
+        - title
+        - sortOrder
+        - status
+        - createdAt
+        - updatedAt
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        parentId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        nodeType:
+          type: string
+        code:
+          type:
+            - "null"
+            - string
+        title:
+          type: string
+        sortOrder:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CurriculumTreeNode:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        parentId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        nodeType:
+          type: string
+        code:
+          type:
+            - "null"
+            - string
+        title:
+          type: string
+        sortOrder:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        children:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/CurriculumTreeNode"
+    DashboardSummaryDto:
+      required:
+        - viewedThisWeekCount
+        - favoriteCount
+        - favoriteAddedThisWeekCount
+        - lastLearningAt
+      type: object
+      properties:
+        viewedThisWeekCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+        favoriteCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+        favoriteAddedThisWeekCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+        lastLearningAt:
+          type:
+            - "null"
+            - string
+          format: date-time
+    FavoriteContentItem:
+      required:
+        - id
+        - contentItemId
+        - curriculumNodeId
+        - contentItemTitle
+        - curriculumNodeTitle
+        - type
+        - createdAt
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        contentItemId:
+          type: string
+          format: uuid
+        curriculumNodeId:
+          type: string
+          format: uuid
+        contentItemTitle:
+          type: string
+        curriculumNodeTitle:
+          type: string
+        type:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    GetAuditLogsResult:
+      required:
+        - items
+        - total
+        - page
+        - pageSize
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/AuditLogDto"
+        total:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        page:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        pageSize:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+    GetTenantsResult:
+      required:
+        - items
+        - total
+        - page
+        - pageSize
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/TenantListItemDto"
+        total:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        page:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        pageSize:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+    GrantContentPermissionRequest:
+      required:
+        - curriculumNodeId
+        - schoolId
+        - userId
+      type: object
+      properties:
+        curriculumNodeId:
+          type: string
+          format: uuid
+        schoolId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        userId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        canView:
+          type: boolean
+          default: true
+        canDownload:
+          type: boolean
+          default: false
+        canComment:
+          type: boolean
+          default: true
+    GrantContentPermissionResult:
+      required:
+        - permissionId
+        - curriculumNodeId
+        - schoolId
+        - userId
+        - canView
+        - canDownload
+        - canComment
+        - updatedAt
+      type: object
+      properties:
+        permissionId:
+          type: string
+          format: uuid
+        curriculumNodeId:
+          type: string
+          format: uuid
+        schoolId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        userId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        canView:
+          type: boolean
+        canDownload:
+          type: boolean
+        canComment:
+          type: boolean
+        updatedAt:
+          type: string
+          format: date-time
+    IdentifyError:
+      required:
+        - code
+        - message
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+    IdentifyRequest:
+      required:
+        - identifier
+      type: object
+      properties:
+        identifier:
+          type: string
+        domain:
+          type:
+            - "null"
+            - string
+    IdentifyResult:
+      required:
+        - nextStep
+      type: object
+      properties:
+        nextStep:
+          type: string
+    IdentityTenantBranding:
+      required:
+        - tenantCode
+        - name
+        - subdomain
+        - domain
+        - isWhiteLabel
+        - logoUrl
+        - avatarUrl
+        - watermarkSettings
+      type: object
+      properties:
+        tenantCode:
+          type: string
+        name:
+          type: string
+        subdomain:
+          type: string
+        domain:
+          type: string
+        isWhiteLabel:
+          type: boolean
+        logoUrl:
+          type:
+            - "null"
+            - string
+        avatarUrl:
+          type:
+            - "null"
+            - string
+        watermarkSettings:
+          type:
+            - "null"
+            - string
+    IResult:
+      type: object
+    LoginCommand:
+      required:
+        - username
+        - password
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        domain:
+          type:
+            - "null"
+            - string
+        userAgent:
+          type:
+            - "null"
+            - string
+        ipAddress:
+          type:
+            - "null"
+            - string
+    LoginError:
+      required:
+        - code
+        - message
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        retryAfterSeconds:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+    LoginResult:
+      required:
+        - accessToken
+        - refreshToken
+        - expiresIn
+        - tenantBranding
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        expiresIn:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        tenantBranding:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/IdentityTenantBranding"
+        tokenType:
+          type: string
+          default: Bearer
+    LogoutRequest:
+      required:
+        - refreshToken
+      type: object
+      properties:
+        refreshToken:
+          type: string
+    NodePermissionViewDto:
+      required:
+        - permissionId
+        - sourceNodeId
+        - isInherited
+        - schoolId
+        - userId
+        - canView
+        - canDownload
+        - canComment
+        - updatedAt
+      type: object
+      properties:
+        permissionId:
+          type: string
+          format: uuid
+        sourceNodeId:
+          type: string
+          format: uuid
+        isInherited:
+          type: boolean
+        schoolId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        userId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        canView:
+          type: boolean
+        canDownload:
+          type: boolean
+        canComment:
+          type: boolean
+        updatedAt:
+          type: string
+          format: date-time
+    PagedResultOfContentListItem:
+      required:
+        - items
+        - totalCount
+        - page
+        - pageSize
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ContentListItem"
+        totalCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        page:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        pageSize:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+    PagedResultOfQuickAccessItem:
+      required:
+        - items
+        - totalCount
+        - page
+        - pageSize
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuickAccessItem"
+        totalCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        page:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        pageSize:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+    Permission:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        module:
+          type: string
+        description:
+          type:
+            - "null"
+            - string
+    ProblemDetails:
+      type: object
+      properties:
+        type:
+          type:
+            - "null"
+            - string
+        title:
+          type:
+            - "null"
+            - string
+        status:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        detail:
+          type:
+            - "null"
+            - string
+        instance:
+          type:
+            - "null"
+            - string
+    QuickAccessItem:
+      required:
+        - contentId
+        - type
+        - title
+        - curriculumNodeId
+        - curriculumNodeTitle
+        - isFavorite
+        - lastViewedAt
+        - favoritedAt
+        - progressValue
+        - group
+      type: object
+      properties:
+        contentId:
+          type: string
+          format: uuid
+        type:
+          type: string
+        title:
+          type: string
+        curriculumNodeId:
+          type: string
+          format: uuid
+        curriculumNodeTitle:
+          type: string
+        isFavorite:
+          type: boolean
+        lastViewedAt:
+          type:
+            - "null"
+            - string
+          format: date-time
+        favoritedAt:
+          type:
+            - "null"
+            - string
+          format: date-time
+        progressValue:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+        group:
+          type: string
+    RefreshTokenRequest:
+      required:
+        - refreshToken
+      type: object
+      properties:
+        refreshToken:
+          type: string
+    ReorderCurriculumRequest:
+      required:
+        - parentId
+        - orderedNodeIds
+      type: object
+      properties:
+        parentId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        orderedNodeIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+    Report:
+      type: object
+      properties:
+        activeTenants:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        activeSchools:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+    ResetPasswordRequest:
+      required:
+        - userId
+        - newPassword
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        newPassword:
+          type: string
+    ResolveTenantResponse:
+      required:
+        - tenantId
+        - tenantCode
+        - name
+        - subdomain
+        - domain
+        - status
+        - isAdminDomain
+        - branding
+      type: object
+      properties:
+        tenantId:
+          type: string
+          format: uuid
+        tenantCode:
+          type: string
+        name:
+          type: string
+        subdomain:
+          type: string
+        domain:
+          type: string
+        status:
+          type: string
+        isAdminDomain:
+          type: boolean
+        branding:
+          $ref: "#/components/schemas/TenantBrandingResponse"
+    RevokeAllOtherSessionsRequest:
+      required:
+        - refreshToken
+      type: object
+      properties:
+        refreshToken:
+          type: string
+    Role:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+    RoleWithPermissions:
+      required:
+        - id
+        - code
+        - name
+        - permissionCodes
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+        permissionCodes:
+          type: array
+          items:
+            type: string
+    School:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+        taxId:
+          type:
+            - "null"
+            - string
+        province:
+          type:
+            - "null"
+            - string
+        district:
+          type:
+            - "null"
+            - string
+        address:
+          type:
+            - "null"
+            - string
+        contactName:
+          type:
+            - "null"
+            - string
+        contactEmail:
+          type:
+            - "null"
+            - string
+        contactPhone:
+          type:
+            - "null"
+            - string
+        contractStartDate:
+          type:
+            - "null"
+            - string
+          format: date
+        contractEndDate:
+          type:
+            - "null"
+            - string
+          format: date
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    SchoolListResult:
+      required:
+        - items
+        - total
+        - page
+        - pageSize
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/School"
+        total:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        page:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        pageSize:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+    SelectWorkspaceRequest:
+      required:
+        - refreshToken
+      type: object
+      properties:
+        refreshToken:
+          type: string
+    SessionDto:
+      required:
+        - id
+        - userAgent
+        - ipAddress
+        - startedAt
+        - lastSeenAt
+        - endedAt
+        - status
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userAgent:
+          type:
+            - "null"
+            - string
+        ipAddress:
+          type:
+            - "null"
+            - string
+        startedAt:
+          type: string
+          format: date-time
+        lastSeenAt:
+          type: string
+          format: date-time
+        endedAt:
+          type:
+            - "null"
+            - string
+          format: date-time
+        status:
+          type: string
+    SignedUrlResponse:
+      required:
+        - url
+        - type
+      type: object
+      properties:
+        url:
+          type: string
+        type:
+          type: string
+    SubscriptionDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        schoolId:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        tenantCode:
+          type: string
+        tenantName:
+          type: string
+        contractStart:
+          type: string
+          format: date
+        contractEnd:
+          type: string
+          format: date
+        maxConcurrentSessions:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        loginPolicy:
+          type: string
+        enforceExpiry:
+          type: boolean
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    SubscriptionListResult:
+      required:
+        - items
+        - total
+        - page
+        - pageSize
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/SubscriptionDto"
+        total:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        page:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        pageSize:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+    TenantBrandingResponse:
+      required:
+        - logoUrl
+        - avatarUrl
+        - watermarkSettings
+      type: object
+      properties:
+        logoUrl:
+          type:
+            - "null"
+            - string
+        avatarUrl:
+          type:
+            - "null"
+            - string
+        watermarkSettings:
+          type:
+            - "null"
+            - string
+    TenantDto:
+      required:
+        - id
+        - code
+        - name
+        - subdomain
+        - logoUrl
+        - avatarUrl
+        - description
+        - watermarkSettings
+        - status
+        - createdAt
+        - updatedAt
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+        subdomain:
+          type: string
+        logoUrl:
+          type:
+            - "null"
+            - string
+        avatarUrl:
+          type:
+            - "null"
+            - string
+        description:
+          type:
+            - "null"
+            - string
+        watermarkSettings:
+          type:
+            - "null"
+            - string
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    TenantListItemDto:
+      required:
+        - id
+        - code
+        - name
+        - subdomain
+        - logoUrl
+        - status
+        - createdAt
+        - updatedAt
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+        subdomain:
+          type: string
+        logoUrl:
+          type:
+            - "null"
+            - string
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    UpdateAvatarRequest:
+      required:
+        - avatarUrl
+      type: object
+      properties:
+        avatarUrl:
+          type: string
+    UpdateCatalogItemRequest:
+      required:
+        - name
+        - description
+        - sortOrder
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type:
+            - "null"
+            - string
+        sortOrder:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+    UpdateContentProgressRequest:
+      required:
+        - progressValue
+      type: object
+      properties:
+        progressValue:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+    UpdateContentRequest:
+      required:
+        - curriculumNodeId
+        - title
+        - description
+        - sourceUrl
+        - watermarkEnabled
+        - isDownloadable
+        - visibilityFrom
+        - visibilityTo
+      type: object
+      properties:
+        curriculumNodeId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type:
+            - "null"
+            - string
+        sourceUrl:
+          type:
+            - "null"
+            - string
+        watermarkEnabled:
+          type: boolean
+        isDownloadable:
+          type: boolean
+        visibilityFrom:
+          type:
+            - "null"
+            - string
+          format: date-time
+        visibilityTo:
+          type:
+            - "null"
+            - string
+          format: date-time
+    UpdateContentStatusRequest:
+      required:
+        - publishStatus
+      type: object
+      properties:
+        publishStatus:
+          type: string
+    UpdateContentStatusResult:
+      required:
+        - contentId
+        - publishStatus
+        - updatedAt
+      type: object
+      properties:
+        contentId:
+          type: string
+          format: uuid
+        publishStatus:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+    UpdateCurriculumNodeRequest:
+      required:
+        - code
+        - title
+        - sortOrder
+      type: object
+      properties:
+        code:
+          type:
+            - "null"
+            - string
+        title:
+          type: string
+        sortOrder:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        status:
+          type: string
+          default: ACTIVE
+    UpdateSchoolRequest:
+      required:
+        - name
+        - taxId
+        - province
+        - district
+        - address
+        - contactName
+        - contactEmail
+        - contactPhone
+        - contractStartDate
+        - contractEndDate
+      type: object
+      properties:
+        name:
+          type: string
+        taxId:
+          type:
+            - "null"
+            - string
+        province:
+          type:
+            - "null"
+            - string
+        district:
+          type:
+            - "null"
+            - string
+        address:
+          type:
+            - "null"
+            - string
+        contactName:
+          type:
+            - "null"
+            - string
+        contactEmail:
+          type:
+            - "null"
+            - string
+        contactPhone:
+          type:
+            - "null"
+            - string
+        contractStartDate:
+          type:
+            - "null"
+            - string
+          format: date
+        contractEndDate:
+          type:
+            - "null"
+            - string
+          format: date
+    UpdateSchoolResult:
+      required:
+        - schoolId
+        - code
+        - name
+        - taxId
+        - province
+        - district
+        - address
+        - contactName
+        - contactEmail
+        - contactPhone
+        - contractStartDate
+        - contractEndDate
+        - status
+      type: object
+      properties:
+        schoolId:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+        taxId:
+          type:
+            - "null"
+            - string
+        province:
+          type:
+            - "null"
+            - string
+        district:
+          type:
+            - "null"
+            - string
+        address:
+          type:
+            - "null"
+            - string
+        contactName:
+          type:
+            - "null"
+            - string
+        contactEmail:
+          type:
+            - "null"
+            - string
+        contactPhone:
+          type:
+            - "null"
+            - string
+        contractStartDate:
+          type:
+            - "null"
+            - string
+          format: date
+        contractEndDate:
+          type:
+            - "null"
+            - string
+          format: date
+        status:
+          type: string
+    UpdateSubscriptionRequest:
+      required:
+        - contractStart
+        - contractEnd
+        - maxConcurrentSessions
+        - loginPolicy
+        - enforceExpiry
+      type: object
+      properties:
+        contractStart:
+          type: string
+          format: date
+        contractEnd:
+          type: string
+          format: date
+        maxConcurrentSessions:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        loginPolicy:
+          type: string
+        enforceExpiry:
+          type: boolean
+    UpdateSubscriptionResult:
+      required:
+        - id
+        - schoolId
+        - tenantId
+        - contractStart
+        - contractEnd
+        - maxConcurrentSessions
+        - loginPolicy
+        - enforceExpiry
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        schoolId:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        contractStart:
+          type: string
+          format: date
+        contractEnd:
+          type: string
+          format: date
+        maxConcurrentSessions:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        loginPolicy:
+          type: string
+        enforceExpiry:
+          type: boolean
+    UpdateTenantRequest:
+      required:
+        - name
+        - code
+        - subdomain
+        - logoUrl
+        - avatarUrl
+        - description
+        - watermarkSettings
+      type: object
+      properties:
+        name:
+          type: string
+        code:
+          type: string
+        subdomain:
+          type: string
+        logoUrl:
+          type:
+            - "null"
+            - string
+        avatarUrl:
+          type:
+            - "null"
+            - string
+        description:
+          type:
+            - "null"
+            - string
+        watermarkSettings:
+          type:
+            - "null"
+            - string
+    UpdateTenantResult:
+      required:
+        - tenantId
+        - code
+        - name
+        - subdomain
+        - logoUrl
+        - avatarUrl
+        - description
+        - watermarkSettings
+        - status
+      type: object
+      properties:
+        tenantId:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+        subdomain:
+          type: string
+        logoUrl:
+          type:
+            - "null"
+            - string
+        avatarUrl:
+          type:
+            - "null"
+            - string
+        description:
+          type:
+            - "null"
+            - string
+        watermarkSettings:
+          type:
+            - "null"
+            - string
+        status:
+          type: string
+    UpdateUserRequest:
+      required:
+        - fullName
+        - email
+        - status
+      type: object
+      properties:
+        fullName:
+          type: string
+        email:
+          type:
+            - "null"
+            - string
+        status:
+          type: string
+        accountType:
+          type:
+            - "null"
+            - string
+        avatarUrl:
+          type:
+            - "null"
+            - string
+    UpdateUserResult:
+      required:
+        - userId
+        - username
+        - fullName
+        - email
+        - status
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        username:
+          type: string
+        fullName:
+          type: string
+        email:
+          type:
+            - "null"
+            - string
+        status:
+          type: string
+        accountType:
+          type:
+            - "null"
+            - string
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        schoolId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        username:
+          type: string
+        email:
+          type:
+            - "null"
+            - string
+        fullName:
+          type: string
+        avatarUrl:
+          type:
+            - "null"
+            - string
+        status:
+          type: string
+        accountType:
+          type:
+            - "null"
+            - string
+    UserEffectiveNodePermissionDto:
+      required:
+        - curriculumNodeId
+        - canView
+        - canDownload
+        - canComment
+      type: object
+      properties:
+        curriculumNodeId:
+          type: string
+          format: uuid
+        canView:
+          type: boolean
+        canDownload:
+          type: boolean
+        canComment:
+          type: boolean
+    UserListResult:
+      required:
+        - items
+        - totalCount
+        - page
+        - pageSize
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+        totalCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        page:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        pageSize:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+    UserPermissionsResult:
+      required:
+        - userId
+        - roleCodes
+        - permissionCodes
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        roleCodes:
+          type: array
+          items:
+            type: string
+        permissionCodes:
+          type: array
+          items:
+            type: string
+    UserTenantDto:
+      required:
+        - tenantId
+        - tenantCode
+        - tenantName
+        - roleId
+        - roleCode
+        - isInherited
+      type: object
+      properties:
+        tenantId:
+          type: string
+          format: uuid
+        tenantCode:
+          type: string
+        tenantName:
+          type: string
+        roleId:
+          type: string
+          format: uuid
+        roleCode:
+          type: string
+        isInherited:
+          type: boolean
+    UserTenantRoleAssignment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        roleId:
+          type: string
+          format: uuid
+        roleCode:
+          type: string
+        roleName:
+          type: string
+        tenantId:
+          type: string
+          format: uuid
+        assignedBy:
+          type:
+            - "null"
+            - string
+          format: uuid
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+    WatermarkConfigResponse:
+      required:
+        - contentId
+        - enabled
+        - companyName
+        - accountName
+        - ipAddress
+        - currentTimeUtc
+        - template
+        - opacity
+        - fontSize
+        - color
+        - position
+        - refreshIntervalSeconds
+        - renderedText
+      type: object
+      properties:
+        contentId:
+          type: string
+          format: uuid
+        enabled:
+          type: boolean
+        companyName:
+          type: string
+        accountName:
+          type: string
+        ipAddress:
+          type:
+            - "null"
+            - string
+        currentTimeUtc:
+          type: string
+          format: date-time
+        template:
+          type: string
+        opacity:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$
+          type:
+            - number
+            - string
+          format: double
+        fontSize:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        color:
+          type: string
+        position:
+          type: string
+        refreshIntervalSeconds:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        renderedText:
+          type: string
+    WorkspaceDto:
+      required:
+        - tenantId
+        - tenantCode
+        - name
+        - subdomain
+        - domain
+        - logoUrl
+        - avatarUrl
+        - isCurrentTenant
+      type: object
+      properties:
+        tenantId:
+          type: string
+          format: uuid
+        tenantCode:
+          type: string
+        name:
+          type: string
+        subdomain:
+          type: string
+        domain:
+          type: string
+        logoUrl:
+          type:
+            - "null"
+            - string
+        avatarUrl:
+          type:
+            - "null"
+            - string
+        isCurrentTenant:
+          type: boolean
+  securitySchemes:
+    Bearer:
+      type: http
+      description: Enter the JWT token obtained from POST /api/identity/auth/login
+      scheme: bearer
+      bearerFormat: JWT
+tags:
+  - name: Health
+  - name: Identity
+  - name: Aig.Lms.Api
+  - name: Schools
+  - name: Users
+  - name: Auth
+  - name: Admin Tenants
+  - name: Audit Logs
+  - name: Authorization
+  - name: Admin
+  - name: Admin Catalog
+  - name: Content Permissions
+  - name: Contents
+  - name: Curriculum
+  - name: ContentDelivery
+  - name: Reports
