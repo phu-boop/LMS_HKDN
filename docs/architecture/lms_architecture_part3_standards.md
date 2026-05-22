@@ -8,7 +8,7 @@ Consistency across the codebase is vital for a large-scale enterprise applicatio
 
 ### 1.1 Backend Conventions
 *   **APIs (REST)**: 
-    *   Use kebab-case for URIs: `/api/v1/content-items`
+    *   Use kebab-case for URIs: `/api/content-items`
     *   Nouns representing resources: `GET /users`, `POST /tenants`
     *   Sub-resources for relationships: `GET /curriculum/{id}/contents`
 *   **DTOs**:

@@ -169,7 +169,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8080/api/v1
+      - NEXT_PUBLIC_API_URL=http://localhost:8080/api
     ports:
       - "3000:3000"
     depends_on:

@@ -6,7 +6,7 @@ This document details the critical request flows, security architecture, and bas
 
 ### 1.1 Tenant Resolution Flow
 Because this is a multi-tenant application, every incoming request must be associated with a specific tenant.
-1.  **Request arrives**: The client makes a request to `https://tenant1.lms.com/api/v1/content`.
+1.  **Request arrives**: The client makes a request to `https://tenant1.lms.com/api/content`.
 2.  **Filter/Interceptor**: `TenantResolutionFilter` intercepts the request.
 3.  **Extraction**: The filter extracts the subdomain (`tenant1`) from the `Host` header or a custom header (`X-Tenant-ID`).
 4.  **Validation**: A cached lookup against the `tenant` table ensures the subdomain is valid and active.

@@ -1,24 +1,24 @@
--- Common Enums (assuming these exist or creating them if missing, but schema relies on them)
+-- Common Enums (đã sửa theo dữ liệu thật)
 DO $$ BEGIN
-    CREATE TYPE common_status AS ENUM ('ACTIVE', 'INACTIVE');
+    CREATE TYPE common_status AS ENUM ('ACTIVE', 'INACTIVE', 'LOCKED', 'DELETED');
 EXCEPTION
     WHEN duplicate_object THEN null;
 END $$;
 
 DO $$ BEGIN
-    CREATE TYPE account_type AS ENUM ('SYSTEM_ADMIN', 'TENANT_ADMIN', 'TEACHER', 'STUDENT');
+    CREATE TYPE account_type AS ENUM ('LMS_ADMIN', 'TENANT_ADMIN', 'SCHOOL_ADMIN', 'TEACHER');
 EXCEPTION
     WHEN duplicate_object THEN null;
 END $$;
 
 DO $$ BEGIN
-    CREATE TYPE login_policy AS ENUM ('BLOCK_NEW', 'LOGOUT_OLD');
+    CREATE TYPE login_policy AS ENUM ('BLOCK_NEW', 'KICK_OLDEST');
 EXCEPTION
     WHEN duplicate_object THEN null;
 END $$;
 
 DO $$ BEGIN
-    CREATE TYPE content_type AS ENUM ('VIDEO', 'DOCUMENT', 'QUIZ');
+    CREATE TYPE content_type AS ENUM ('VIDEO', 'PDF', 'SLIDE', 'WORD', 'URL');
 EXCEPTION
     WHEN duplicate_object THEN null;
 END $$;
@@ -30,13 +30,13 @@ EXCEPTION
 END $$;
 
 DO $$ BEGIN
-    CREATE TYPE comment_status AS ENUM ('PENDING', 'APPROVED', 'REJECTED');
+    CREATE TYPE comment_status AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'DELETED');
 EXCEPTION
     WHEN duplicate_object THEN null;
 END $$;
 
 DO $$ BEGIN
-    CREATE TYPE session_status AS ENUM ('ACTIVE', 'EXPIRED', 'REVOKED');
+    CREATE TYPE session_status AS ENUM ('ACTIVE', 'REVOKED', 'EXPIRED');
 EXCEPTION
     WHEN duplicate_object THEN null;
 END $$;
