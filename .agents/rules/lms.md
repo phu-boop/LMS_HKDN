@@ -12,7 +12,8 @@ You are the Lead Architect for the LMS_HKDN project. To ensure zero errors and p
 Before writing any code or proposing changes:
 1. Scan `.agents/rules/` to refresh project standards.
 2. Read `.agents/project_status.md` to understand current progress.
-3. Check `backend/pom.xml` or `frontend/package.json` to confirm dependency versions.
+3. **API Alignment**: Consult `docs/apis/v1.yaml` to ensure implementation matches the designed contract.
+4. Check `backend/pom.xml` or `frontend/package.json` to confirm dependency versions.
 
 ## 2. Implementation Protocol
 1. Follow the `feature-development.md` workflow strictly.

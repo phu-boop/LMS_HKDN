@@ -30,7 +30,7 @@ public class SecurityConfig {
             .and()
             .cors().and()
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**", "/v3/api-docs/**", "/swagger-ui/**")
+                .requestMatchers("/api/identity/**", "/api/health/**", "/swagger-ui/**")
                     .permitAll()
                 .anyRequest().authenticated())
             .addFilterBefore(tenantResolutionFilter, UsernamePasswordAuthenticationFilter.class)

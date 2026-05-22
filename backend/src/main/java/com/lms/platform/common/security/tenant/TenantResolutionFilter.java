@@ -36,7 +36,8 @@ public class TenantResolutionFilter extends OncePerRequestFilter {
 
     // List of path prefixes that bypass tenant resolution (e.g. system health endpoints, swagger docs)
     private static final List<String> EXCLUDED_PATHS = Arrays.asList(
-            "/api/health",
+            "/api/health/**",
+            "/api/identity/**",
             "/swagger-ui",
             "/v3/api-docs",
             "/favicon.ico"
@@ -74,7 +75,9 @@ public class TenantResolutionFilter extends OncePerRequestFilter {
 
             if (tenant == null) {
                 // No tenant resolved
-                throw new TenantContextRequiredException("Tenant context is required for this request. Please provide 'X-Tenant-Code' header or access via a tenant subdomain.");
+                //throw new TenantContextRequiredException("Tenant context is required for this request. Please provide 'X-Tenant-Code' header or access via a tenant subdomain.");
+                filterChain.doFilter(request, response);
+                return;
             }
 
             // Bind resolved tenant metadata to current ThreadLocal context

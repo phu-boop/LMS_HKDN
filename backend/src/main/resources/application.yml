@@ -30,3 +30,16 @@ logging:
   level:
     com.lms.platform: DEBUG
     org.springframework.security: INFO
+jwt:
+  secret: mySuperSecretKeyForJwtAuthentication12345678901234567890
+
+  access:
+    expiration: 3600000
+
+  refresh:
+    expiration: 604800000
+
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html

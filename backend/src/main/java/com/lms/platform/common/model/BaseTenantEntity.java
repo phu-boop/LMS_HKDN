@@ -18,7 +18,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @MappedSuperclass
-@FilterDef(name = "tenantFilter", parameters = @ParamDef(name = "tenantId", type = "uuid"))
+@FilterDef(name = "tenantFilter", parameters = @ParamDef(name = "tenantId", type = UUID.class))
 @Filter(name = "tenantFilter", condition = "tenant_id = :tenantId")
 public abstract class BaseTenantEntity extends BaseEntity {
 
