@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 public class IdentifyRequest {
-    @NotBlank
+    @NotBlank(message = "Identifier is required.")
     private String identifier;
     private String domain;
 }

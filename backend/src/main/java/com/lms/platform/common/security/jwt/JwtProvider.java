@@ -81,4 +81,8 @@ public class JwtProvider {
                 .parseClaimsJws(token)
                 .getBody();
     }
+
+    public Long getExpiresIn(){
+        return this.getExpiresIn();
+    }
 }

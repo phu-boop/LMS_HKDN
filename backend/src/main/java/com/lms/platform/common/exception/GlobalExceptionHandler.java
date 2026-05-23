@@ -78,24 +78,22 @@ public class GlobalExceptionHandler {
      * Handle validation errors (HTTP 400).
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ProblemDetails> handleValidationException(MethodArgumentNotValidException ex, WebRequest request) {
+    public ResponseEntity<?> handleValidationException(MethodArgumentNotValidException ex, WebRequest request) {
         String validationErrors = ex.getBindingResult().getFieldErrors().stream()
-                .map(error -> String.format("%s: %s", error.getField(), error.getDefaultMessage()))
-                .collect(Collectors.joining("; "));
-        
+                .map(error -> String.format(error.getDefaultMessage()))
+                .collect(Collectors.joining(""));
+        IdentifyErrorResponse identifyErrorResponse = new IdentifyErrorResponse();
         log.warn("Validation failure: {}", validationErrors);
-
-        ProblemDetails problemDetails = ProblemDetails.builder()
-                .type("https://errors.daihoc.io.vn/validation-error")
-                .title("Validation Failed")
-                .status(HttpStatus.BAD_REQUEST.value())
-                .detail(validationErrors)
-                .instance(getRequestUri(request))
-                .build();
-
-        return new ResponseEntity<>(problemDetails, HttpStatus.BAD_REQUEST);
+        if ("Identifier is required.".equals(validationErrors)) {
+            identifyErrorResponse.setCode("VALIDATION_ERROR");
+            identifyErrorResponse.setMessage(validationErrors);
+        }
+        else {
+            identifyErrorResponse.setCode("VALIDATION_ERROR");
+            identifyErrorResponse.setMessage("This is default error.");
+             }
+        return new ResponseEntity<>(identifyErrorResponse, HttpStatus.BAD_REQUEST);
     }
-
     /**
      * Handle Spring MVC NoResourceFoundException (HTTP 404).
      */
