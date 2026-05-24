@@ -1,0 +1,29 @@
+src/
+├── app/
+│   ├── (auth)/                  # Layout & Pages cho phần đăng nhập chung
+│   │   └── login/page.tsx
+│   ├── (lms-admin)/             # Portal cho Super Admin
+│   │   ├── layout.tsx           # Sidebar & Header riêng của LMS Admin
+│   │   ├── dashboard/page.tsx
+│   │   └── tenants/page.tsx
+│   ├── (tenant-admin)/          # Portal quản lý nội dung cho từng mảng
+│   │   ├── layout.tsx           # Sidebar & Header riêng của Tenant Admin
+│   │   ├── curriculum/page.tsx
+│   │   └── contents/page.tsx
+│   └── (client)/                # Portal cho Trường học / Giáo viên
+│       ├── layout.tsx           # Layout hiển thị Branding động theo trường
+│       ├── dashboard/page.tsx
+│       └── learn/[id]/page.tsx
+├── components/                  # UI Components dùng chung
+│   ├── ui/                      # Các base component (Button, Input, Modal, Table...)
+│   └── shared/                  # Components ghép (VideoPlayer, PDFViewer...)
+├── lib/
+│   ├── utils.ts                 # Hàm helper (format ngày, classnames...)
+│   └── mockData/                # Toàn bộ dữ liệu cứng để test UI
+│       ├── tenants.ts
+│       ├── curriculum.ts
+│       └── users.ts
+└── types/                       # Định nghĩa TypeScript Interfaces/Types
+    ├── tenant.ts
+    ├── content.ts
+    └── user.ts
