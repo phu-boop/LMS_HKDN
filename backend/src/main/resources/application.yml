@@ -43,3 +43,6 @@ jwt:
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
+
+app:
+  domain-prefix: .daihoc.io.vn

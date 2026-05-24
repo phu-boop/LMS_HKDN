@@ -13,7 +13,7 @@ import java.util.UUID;
  */
 @Repository
 public interface TenantRepository extends JpaRepository<Tenant, UUID> {
-
+    Optional<Tenant> findByCode(String Code);
     /**
      * Find an active, non-deleted Tenant by its subdomain.
      */

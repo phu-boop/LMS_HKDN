@@ -44,21 +44,6 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handle IdentifyException separately to return IdentifyError schema.
-     */
-    @ExceptionHandler(IdentifyException.class)
-    public ResponseEntity<IdentifyErrorResponse> handleIdentifyException(IdentifyException ex) {
-        log.warn("Identify Exception: [{}] - {}", ex.getCode(), ex.getMessage());
-        
-        IdentifyErrorResponse errorResponse = IdentifyErrorResponse.builder()
-                .code(ex.getCode())
-                .message(ex.getDetail())
-                .build();
-                
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-    }
-
-    /**
      * Handle LoginException separately to return LoginError schema.
      */
     @ExceptionHandler(LoginException.class)
@@ -86,7 +71,7 @@ public class GlobalExceptionHandler {
         log.warn("Validation failure: {}", validationErrors);
         if ("Identifier is required.".equals(validationErrors)) {
             identifyErrorResponse.setCode("VALIDATION_ERROR");
-            identifyErrorResponse.setMessage(validationErrors);
+            identifyErrorResponse.setMessage("Identifier is required.");
         }
         else {
             identifyErrorResponse.setCode("VALIDATION_ERROR");

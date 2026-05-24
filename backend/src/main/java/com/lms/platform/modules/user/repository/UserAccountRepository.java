@@ -1,4 +1,4 @@
-package com.lms.platform.modules.identity.repository;
+package com.lms.platform.modules.user.repository;
 
 import com.lms.platform.modules.user.entity.UserAccount;
 import org.springframework.data.jpa.repository.JpaRepository;

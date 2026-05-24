@@ -31,7 +31,7 @@ public class JwtProvider {
 
     public String generateAccessToken(UserDetails userDetails, UUID tenantId, String tenantCode) {
         Claims claims = Jwts.claims().setSubject(userDetails.getUsername());
-        claims.put("tenantId", tenantId.toString());
+        claims.put("tenantId", tenantId!=null?tenantId.toString():null);
         claims.put("tenantCode", tenantCode);
         claims.put("roles", userDetails.getAuthorities()
                 .stream().map(GrantedAuthority::getAuthority).toList());
@@ -49,7 +49,7 @@ public class JwtProvider {
 
     public String generateRefreshToken(UserDetails userDetails, UUID tenantId) {
         Claims claims = Jwts.claims().setSubject(userDetails.getUsername());
-        claims.put("tenantId", tenantId.toString());
+        claims.put("tenantId", tenantId!=null?tenantId.toString():null);
 
         Date now = new Date();
         Date expiry = new Date(now.getTime() + refreshExpirationMs);
@@ -83,6 +83,6 @@ public class JwtProvider {
     }
 
     public Long getExpiresIn(){
-        return this.getExpiresIn();
+        return this.accessExpirationMs;
     }
 }
