@@ -1,8 +1,12 @@
 package com.lms.platform.common.security.jwt;
 
+import com.lms.platform.common.security.CustomUserDetails;
+import com.lms.platform.modules.rbac.repository.UserTenantRoleAssignmentRepository;
+import com.lms.platform.modules.tenant.entity.Tenant;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,6 +17,7 @@ import java.util.Date;
 import java.util.UUID;
 
 @Component
+@RequiredArgsConstructor
 public class JwtProvider {
 
     @Value("${jwt.secret}")
@@ -24,20 +29,30 @@ public class JwtProvider {
     @Value("${jwt.refresh.expiration}")
     private long refreshExpirationMs;
 
+    private final UserTenantRoleAssignmentRepository userTenantRoleAssignmentRepository;
+
     private Key getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateAccessToken(UserDetails userDetails, UUID tenantId, String tenantCode) {
-        Claims claims = Jwts.claims().setSubject(userDetails.getUsername());
-        claims.put("tenantId", tenantId!=null?tenantId.toString():null);
-        claims.put("tenantCode", tenantCode);
-        claims.put("roles", userDetails.getAuthorities()
-                .stream().map(GrantedAuthority::getAuthority).toList());
+    public String generateAccessToken(UUID idUser, String idSchool, UserDetails userDetails, Tenant tenantFirst) {
+        Claims claims = Jwts.claims().setSubject(idUser.toString());
+        claims.put("unique_name", userDetails.getUsername());
+        //check
+        claims.put("jti", UUID.randomUUID().toString());
+        claims.put(
+                "full_name",
+                ((CustomUserDetails) userDetails).getFullName()
+        );
+        claims.put("tenant_id", tenantFirst != null ? tenantFirst.getId() : null);
+        claims.put("school_id", idSchool);
+        claims.put("subdomain", tenantFirst != null ? tenantFirst.getSubdomain() : null);
 
+        claims.put("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", userTenantRoleAssignmentRepository.findRoleByIdUser(idUser));
         Date now = new Date();
         Date expiry = new Date(now.getTime() + accessExpirationMs);
+        claims.put("aud", "aig-lms-clients");
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -47,8 +62,8 @@ public class JwtProvider {
                 .compact();
     }
 
-    public String generateRefreshToken(UserDetails userDetails, UUID tenantId) {
-        Claims claims = Jwts.claims().setSubject(userDetails.getUsername());
+    public String generateRefreshToken(UUID userId, UUID tenantId) {
+        Claims claims = Jwts.claims().setSubject(userId.toString());
         claims.put("tenantId", tenantId!=null?tenantId.toString():null);
 
         Date now = new Date();

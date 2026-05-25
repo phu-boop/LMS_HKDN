@@ -21,6 +21,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import org.springframework.util.AntPathMatcher;
 
 /**
  * Filter responsible for intercepting all requests and resolving the active Tenant context.
@@ -43,10 +44,12 @@ public class TenantResolutionFilter extends OncePerRequestFilter {
             "/favicon.ico"
     );
 
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
+
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return EXCLUDED_PATHS.stream().anyMatch(path::startsWith);
+        return EXCLUDED_PATHS.stream().anyMatch(pattern -> pathMatcher.match(pattern, path));
     }
 
     @Override

@@ -1,11 +1,9 @@
 package com.lms.platform.modules.identity.service;
 
-import com.lms.platform.modules.identity.dto.IdentifyRequest;
-import com.lms.platform.modules.identity.dto.IdentifyResult;
-import com.lms.platform.modules.identity.dto.LoginRequest;
-import com.lms.platform.modules.identity.dto.LoginResponse;
+import com.lms.platform.modules.identity.dto.*;
 
 public interface IdentityService {
-    IdentifyResult identify(IdentifyRequest request);
+    IdentifyResponse identify(IdentifyRequest request);
     LoginResponse login(LoginRequest request);
+    LoginResponse refresh(RefreshTokenRequest request);
 }

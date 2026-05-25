@@ -1,5 +1,6 @@
-package com.lms.platform.security;
+package com.lms.platform.common.security;
 
+import com.lms.platform.modules.rbac.repository.UserTenantRoleAssignmentRepository;
 import com.lms.platform.modules.user.entity.UserAccount;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -7,19 +8,15 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.List;
 
 @RequiredArgsConstructor
 public class CustomUserDetails implements UserDetails {
 
     private final UserAccount user;
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
 
-        return List.of(
-                new SimpleGrantedAuthority("ROLE_ADMIN")
-        );
+        return null;
     }
 
     @Override
@@ -32,6 +29,9 @@ public class CustomUserDetails implements UserDetails {
         return user.getUsername();
     }
 
+    public String getFullName() {
+        return user.getFullName();
+    }
     @Override
     public boolean isAccountNonExpired() {
         return true;

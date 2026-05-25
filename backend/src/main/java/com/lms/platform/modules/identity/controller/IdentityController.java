@@ -1,9 +1,6 @@
 package com.lms.platform.modules.identity.controller;
 
-import com.lms.platform.modules.identity.dto.IdentifyRequest;
-import com.lms.platform.modules.identity.dto.IdentifyResult;
-import com.lms.platform.modules.identity.dto.LoginRequest;
-import com.lms.platform.modules.identity.dto.LoginResponse;
+import com.lms.platform.modules.identity.dto.*;
 import com.lms.platform.modules.identity.service.IdentityService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,14 +18,20 @@ public class IdentityController {
     private final IdentityService identityService;
 
     @PostMapping("/identify")
-    public ResponseEntity<IdentifyResult> identify(@Valid @RequestBody IdentifyRequest request) {
-        IdentifyResult result = identityService.identify(request);
+    public ResponseEntity<IdentifyResponse> identify(@Valid @RequestBody IdentifyRequest request) {
+        IdentifyResponse result = identityService.identify(request);
         return ResponseEntity.ok(result);
     }
 
     @PostMapping("/auth/login")
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest){
-        LoginResponse result = identityService.login(loginRequest);;
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request){
+        LoginResponse result = identityService.login(request);
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/auth/refresh")
+    public ResponseEntity<LoginResponse> refresh(@Valid @RequestBody RefreshTokenRequest request){
+        LoginResponse result = identityService.refresh(request);
         return ResponseEntity.ok(result);
     }
 }
