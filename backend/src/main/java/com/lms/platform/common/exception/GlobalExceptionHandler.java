@@ -3,6 +3,7 @@ package com.lms.platform.common.exception;
 import com.lms.platform.common.response.IdentifyErrorResponse;
 import com.lms.platform.common.response.LoginErrorResponse;
 import com.lms.platform.common.response.ProblemDetails;
+import com.lms.platform.common.response.RefreshTokenErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -56,6 +57,22 @@ public class GlobalExceptionHandler {
                 .retryAfterSeconds(ex.getRetryAfterSeconds())
                 .build();
                 
+        return new ResponseEntity<>(errorResponse, ex.getStatus());
+    }
+
+    /**
+     * Handle RefreshTokenException to return RefreshTokenError schema.
+     */
+    @ExceptionHandler(RefreshTokenException.class)
+    public ResponseEntity<RefreshTokenErrorResponse> handleRefreshTokenException(RefreshTokenException ex) {
+        log.warn("Refresh Token Exception: [{}] - {}", ex.getCode(), ex.getMessage());
+
+        RefreshTokenErrorResponse errorResponse = RefreshTokenErrorResponse.builder()
+                .code(ex.getCode())
+                .message(ex.getDetail())
+                .retryAfterSeconds(ex.getRetryAfterSeconds())
+                .build();
+
         return new ResponseEntity<>(errorResponse, ex.getStatus());
     }
 
