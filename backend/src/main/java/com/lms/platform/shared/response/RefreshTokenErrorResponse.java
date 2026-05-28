@@ -14,5 +14,5 @@ import java.time.OffsetDateTime;
 public class RefreshTokenErrorResponse {
     private String code;
     private String message;
-    private OffsetDateTime retryAfterSeconds;
+    private Integer retryAfterSeconds;
 }

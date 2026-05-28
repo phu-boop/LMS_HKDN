@@ -8,11 +8,12 @@
 - [ ] Centralized API Client (Frontend)
 - [ ] Global Exception Handler (Backend)
 
-## 2. Security Foundation (Current)
-- [ ] Security Configuration (Spring Security)
-- [ ] JWT Implementation (Access/Refresh Tokens)
-- [ ] RBAC Entities (User, Role, Permission)
-- [ ] Tenant-aware UserDetailsService
+## 2. Security Foundation (Completed)
+- [x] Security Configuration (Spring Security)
+- [x] JWT Implementation (Access/Refresh Tokens)
+- [x] RBAC Entities (User, Role, Permission)
+- [x] Tenant-aware UserDetailsService
+- [x] Brute-force protection & Account Locking
 
 ## 3. Feature Modules
 - [ ] Tenant/School Management

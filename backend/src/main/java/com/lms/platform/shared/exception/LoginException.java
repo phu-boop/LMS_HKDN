@@ -22,6 +22,22 @@ public class LoginException extends BaseException {
         this.retryAfterSeconds = retryAfterSeconds;
     }
 
+    public LoginException(ErrorCode errorCode) {
+        this(HttpStatus.UNAUTHORIZED, errorCode.getCode(), errorCode.getDefaultMessage(), null);
+    }
+
+    public LoginException(HttpStatus status, ErrorCode errorCode) {
+        this(status, errorCode.getCode(), errorCode.getDefaultMessage(), null);
+    }
+
+    public LoginException(HttpStatus status, ErrorCode errorCode, Integer retryAfterSeconds) {
+        this(status, errorCode.getCode(), errorCode.getDefaultMessage(), retryAfterSeconds);
+    }
+
+    public LoginException(HttpStatus status, ErrorCode errorCode, String message, Integer retryAfterSeconds) {
+        this(status, errorCode.getCode(), message, retryAfterSeconds);
+    }
+
     public Integer getRetryAfterSeconds() {
         return retryAfterSeconds;
     }

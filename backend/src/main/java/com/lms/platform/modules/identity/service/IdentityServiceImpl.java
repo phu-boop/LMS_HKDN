@@ -1,7 +1,9 @@
 package com.lms.platform.modules.identity.service;
 
+import com.lms.platform.common.exception.ErrorCode;
 import com.lms.platform.common.exception.LoginException;
 import com.lms.platform.common.exception.RefreshTokenException;
+import com.lms.platform.common.model.enums.CommonStatus;
 import com.lms.platform.common.security.CustomUserDetails;
 import com.lms.platform.common.security.jwt.JwtProvider;
 import com.lms.platform.modules.identity.dto.*;
@@ -13,9 +15,12 @@ import com.lms.platform.modules.user.entity.UserAccount;
 import com.lms.platform.modules.user.repository.UserAccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,8 +39,31 @@ public class IdentityServiceImpl implements IdentityService {
 
     @Override
     public IdentifyResponse identify(IdentifyRequest request) {
-        // For now, simply return the next step as PASSWORD
-        return new IdentifyResponse("PASSWORD", null);
+        UserAccount userAccount = userAccountRepository
+                .findByUsername(request.getIdentifier())
+                .orElseThrow(this::invalidCredentials);
+
+        // Check if account is permanently blocked or inactive
+        if (userAccount.getStatus() != CommonStatus.ACTIVE) {
+            throw new LoginException(HttpStatus.FORBIDDEN, ErrorCode.ACCOUNT_LOCKED);
+        }
+
+        // Check if account is temporarily locked
+        if (userAccount.getLockedUntil() != null && userAccount.getLockedUntil().isAfter(OffsetDateTime.now())) {
+            long secondsLeft = Duration.between(OffsetDateTime.now(), userAccount.getLockedUntil()).getSeconds();
+            throw new LoginException(HttpStatus.FORBIDDEN, ErrorCode.TEMPORARILY_LOCKED, (int) secondsLeft);
+        }
+
+        Tenant tenantPrimary = getPrimaryTenant(userAccount);
+        if (tenantPrimary == null) {
+            throw new LoginException(HttpStatus.FORBIDDEN, ErrorCode.TENANT_NOT_ASSIGNED);
+        }
+        IdentityTenantBranding branding = null;
+        if (tenantPrimary != null) {
+            branding = buildTenantBranding(tenantPrimary);
+        }
+
+        return new IdentifyResponse("PASSWORD", branding);
     }
 
     @Override
@@ -44,13 +72,41 @@ public class IdentityServiceImpl implements IdentityService {
                 .findByUsername(request.username())
                 .orElseThrow(this::invalidCredentials);
 
-        validatePassword(request.password(), userAccount);
+        // Check if account is permanently blocked or inactive
+        // Check if account is permanently blocked or inactive
+        if (userAccount.getStatus() != CommonStatus.ACTIVE) {
+            throw new LoginException(HttpStatus.FORBIDDEN, ErrorCode.ACCOUNT_LOCKED);
+        }
+
+        // Check if account is temporarily locked
+        if (userAccount.getLockedUntil() != null && userAccount.getLockedUntil().isAfter(OffsetDateTime.now())) {
+            long secondsLeft = Duration.between(OffsetDateTime.now(), userAccount.getLockedUntil()).getSeconds();
+            throw new LoginException(HttpStatus.FORBIDDEN, ErrorCode.TEMPORARILY_LOCKED, (int) secondsLeft);
+        }
+
+        try {
+            validatePassword(request.password(), userAccount);
+        } catch (LoginException e) {
+            // Increment failed attempts
+            userAccount.setFailedAttempts(userAccount.getFailedAttempts() + 1);
+            if (userAccount.getFailedAttempts() >= 5) {
+                userAccount.setLockedUntil(OffsetDateTime.now().plusMinutes(15));
+            }
+            userAccountRepository.save(userAccount);
+            throw e;
+        }
+
+        // Reset failed attempts on success
+        userAccount.setFailedAttempts(0);
+        userAccount.setLockedUntil(null);
+        userAccount.setLastLoginAt(OffsetDateTime.now());
+        userAccountRepository.save(userAccount);
 
         Tenant tenantPrimary = getPrimaryTenant(userAccount);
-        IdentityTenantBranding branding = null;
-        if (tenantPrimary != null) {
-            branding = buildTenantBranding(tenantPrimary);
+        if (tenantPrimary == null) {
+            throw new LoginException(HttpStatus.FORBIDDEN, ErrorCode.TENANT_NOT_ASSIGNED);
         }
+        IdentityTenantBranding branding = buildTenantBranding(tenantPrimary);
 
         UserDetails userDetails = new CustomUserDetails(userAccount);
         String accessToken = jwtProvider.generateAccessToken(
@@ -80,10 +136,7 @@ public class IdentityServiceImpl implements IdentityService {
     }
 
     private LoginException invalidCredentials() {
-        return new LoginException(
-                "INVALID_CREDENTIALS",
-                "Invalid username or password."
-        );
+        return new LoginException(ErrorCode.INVALID_CREDENTIALS);
     }
 
     private Tenant getPrimaryTenant(UserAccount userAccount) {
@@ -128,7 +181,7 @@ public class IdentityServiceImpl implements IdentityService {
                     .orElseThrow(this::invalidCredentials);
 
             if(userAccount.getLockedUntil()!=null){
-                throw new RefreshTokenException("Refresh token is invalid or expired.", userAccount.getLockedUntil());
+                throw new RefreshTokenException(ErrorCode.INVALID_TOKEN);
             }
             Tenant tenantPrimary = getPrimaryTenant(userAccount);
             IdentityTenantBranding branding = null;
@@ -157,7 +210,21 @@ public class IdentityServiceImpl implements IdentityService {
             );
         }
         else {
-            throw new RefreshTokenException("Refresh token is invalid or expired.",null);
+            throw new RefreshTokenException(ErrorCode.INVALID_TOKEN);
         }
+    }
+
+    private Integer offsetDateTimeToInteger(OffsetDateTime x){
+        Integer y = null;
+
+        if (x != null) {
+            long seconds = Duration.between(
+                    OffsetDateTime.now(),
+                    x
+            ).getSeconds();
+
+            y = (int) Math.max(seconds, 0);
+        }
+        return y;
     }
 }
