@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý User - LMS Admin Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .drawer-shadow { background: rgba(0, 0, 0, 0.4); }
+        
+        /* Tùy chỉnh thanh cuộn */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body>
+
+<div class="flex min-h-screen">
+    <div class="w-64 bg-slate-900 text-white p-6 hidden md:block flex-shrink-0">
+        <div class="text-2xl font-bold mb-8 text-blue-400">AIG LMS</div>
+        <nav class="space-y-4">
+            <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-slate-800 text-slate-400">Dashboard</a>
+            <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-slate-800 text-slate-400">Quản lý Tenant</a>
+            <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-slate-800 text-slate-400">Trường học</a>
+            <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-slate-800 text-slate-400">Hợp đồng</a>
+            <a href="#" class="block py-2.5 px-4 rounded bg-blue-600 text-white font-medium shadow-md shadow-blue-900/50">Quản lý User</a>
+            <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-slate-800 text-slate-400">Audit Logs</a>
+        </nav>
+    </div>
+
+    <div class="flex-1 p-8 overflow-x-hidden flex flex-col h-screen">
+        
+        <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800">Quản lý Người dùng</h1>
+                <p class="text-sm text-slate-500 mt-1">Quản trị danh tính tập trung toàn hệ thống (LMS Admin, Tenant Admin, School Admin, Teacher)</p>
+            </div>
+            <div class="flex gap-3">
+                <div class="relative">
+                    <input type="text" placeholder="Tìm tên, email, username..." class="pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none w-64">
+                    <span class="absolute left-3 top-2.5 text-slate-400">🔍</span>
+                </div>
+                <select class="border border-slate-300 rounded-lg px-3 py-2.5 text-sm outline-none bg-white text-slate-700">
+                    <option value="">Tất cả loại tài khoản</option>
+                    <option value="LMS_ADMIN">LMS Admin</option>
+                    <option value="TENANT_ADMIN">Tenant Admin</option>
+                    <option value="SCHOOL_ADMIN">School Admin</option>
+                    <option value="TEACHER">Giáo viên</option>
+                </select>
+                <button onclick="openDrawer()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition shadow-sm">
+                    + Thêm User
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 flex-1 overflow-hidden flex flex-col">
+            <div class="overflow-x-auto flex-1">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
+                        <tr>
+                            <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Người dùng</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Loại định danh (Account Type)</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Trường trực thuộc (Home School)</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Trạng thái</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200">
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="px-6 py-4 flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-sm">HT</div>
+                                <div>
+                                    <div class="font-medium text-slate-800">Hoàng Hệ Thống</div>
+                                    <div class="text-xs text-slate-500 mt-0.5">admin@daihoc.io.vn</div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="px-2.5 py-1 text-[11px] font-bold bg-purple-100 text-purple-700 rounded border border-purple-200">LMS_ADMIN</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="text-sm text-slate-400 italic">-- Hệ thống (Không áp dụng) --</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="px-2.5 py-1 text-xs font-medium bg-emerald-100 text-emerald-700 rounded-full border border-emerald-200">Active</span>
+                            </td>
+                            <td class="px-6 py-4 text-right space-x-2">
+                                <button class="text-slate-500 hover:text-blue-600 font-medium text-sm transition" title="Đặt lại mật khẩu">🔑</button>
+                                <button class="text-blue-600 hover:text-blue-800 font-medium text-sm px-3 py-1 bg-blue-50 hover:bg-blue-100 rounded transition">Sửa</button>
+                            </td>
+                        </tr>
+
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="px-6 py-4 flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-sm">TT</div>
+                                <div>
+                                    <div class="font-medium text-slate-800">Trần Trưởng Mảng</div>
+                                    <div class="text-xs text-slate-500 mt-0.5">truongmang.stem@daihoc.io.vn</div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="px-2.5 py-1 text-[11px] font-bold bg-orange-100 text-orange-700 rounded border border-orange-200">TENANT_ADMIN</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="text-sm text-slate-400 italic">-- Platform / Tự do --</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="px-2.5 py-1 text-xs font-medium bg-emerald-100 text-emerald-700 rounded-full border border-emerald-200">Active</span>
+                            </td>
+                            <td class="px-6 py-4 text-right space-x-2">
+                                <button class="text-slate-500 hover:text-blue-600 font-medium text-sm transition">🔑</button>
+                                <button class="text-blue-600 hover:text-blue-800 font-medium text-sm px-3 py-1 bg-blue-50 hover:bg-blue-100 rounded transition">Sửa</button>
+                            </td>
+                        </tr>
+
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="px-6 py-4 flex items-center gap-3">
+                                <img src="https://i.pravatar.cc/150?img=32" alt="Avatar" class="w-10 h-10 rounded-full object-cover">
+                                <div>
+                                    <div class="font-medium text-slate-800">Nguyễn Cô Giáo</div>
+                                    <div class="text-xs text-slate-500 mt-0.5">cogiao@thptlhp.edu.vn</div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="px-2.5 py-1 text-[11px] font-bold bg-blue-100 text-blue-700 rounded border border-blue-200">TEACHER</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-sm text-slate-700 font-medium">THPT Lê Hồng Phong</div>
+                                <div class="text-xs text-slate-500 font-mono mt-0.5">LHP-HCM</div>
+                                <div class="flex gap-1 mt-1.5">
+                                    <span class="px-1.5 py-0.5 text-[10px] font-medium bg-indigo-50 text-indigo-600 rounded border border-indigo-100" title="Kế thừa tự động">STEM ✘</span>
+                                    <span class="px-1.5 py-0.5 text-[10px] font-medium bg-indigo-50 text-indigo-600 rounded border border-indigo-100" title="Kế thừa tự động">ENGLISH ✘</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="px-2.5 py-1 text-xs font-medium bg-emerald-100 text-emerald-700 rounded-full border border-emerald-200">Active</span>
+                            </td>
+                            <td class="px-6 py-4 text-right space-x-2">
+                                <button class="text-slate-500 hover:text-blue-600 font-medium text-sm transition">🔑</button>
+                                <button class="text-blue-600 hover:text-blue-800 font-medium text-sm px-3 py-1 bg-blue-50 hover:bg-blue-100 rounded transition">Sửa</button>
+                            </td>
+                        </tr>
+
+                        <!-- STUDENT row removed: hệ thống không có loại tài khoản STUDENT -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-between items-center text-sm text-slate-500">
+                <div>Hiển thị 1 - 4 trong số 15,240 người dùng</div>
+                <div class="flex gap-2">
+                    <button class="px-3 py-1 border border-slate-300 rounded bg-white hover:bg-slate-50 disabled:opacity-50" disabled>Trước</button>
+                    <button class="px-3 py-1 border border-slate-300 rounded bg-white hover:bg-slate-50">Sau</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="userDrawer" class="fixed inset-0 hidden z-50">
+    <div class="fixed inset-0 drawer-shadow backdrop-blur-sm transition-opacity" onclick="closeDrawer()"></div>
+    
+    <div class="fixed right-0 top-0 bottom-0 w-full max-w-lg bg-white shadow-2xl flex flex-col transition-transform duration-300 translate-x-full" id="drawerContent">
+        
+        <div class="p-6 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+            <div>
+                <h2 class="text-xl font-bold text-slate-800">Thêm Người dùng mới</h2>
+                <p class="text-xs text-slate-500 mt-1">Cấp tài khoản và định danh cho hệ thống</p>
+            </div>
+            <button onclick="closeDrawer()" class="text-slate-400 hover:text-slate-700 text-2xl transition">&times;</button>
+        </div>
+        
+        <div class="p-6 flex-1 overflow-y-auto space-y-8">
+            
+            <div>
+                <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs">1</span>
+                    Định danh & Trực thuộc
+                </h3>
+                <div class="space-y-4 p-4 border border-blue-100 bg-blue-50/30 rounded-xl">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">Loại định danh (Account Type) <span class="text-red-500">*</span></label>
+                        <select id="accountTypeSelect" onchange="handleAccountTypeChange()" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                            <option value="TEACHER" selected>TEACHER - Giáo viên/Giảng viên</option>
+                            <option value="SCHOOL_ADMIN">SCHOOL_ADMIN - Quản trị viên Trường</option>
+                            <option value="TENANT_ADMIN">TENANT_ADMIN - Quản trị viên Mảng</option>
+                            <option value="LMS_ADMIN">LMS_ADMIN - Super Admin Toàn hệ thống</option>
+                        </select>
+                    </div>
+                    
+                    <div id="homeSchoolContainer">
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">Trường trực thuộc (Home School)</label>
+                        <select id="homeSchoolSelect" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                            <option value="">-- Chọn Trường học (nếu có) --</option>
+                            <option value="1">THPT Lê Hồng Phong</option>
+                            <option value="2">THPT Chuyên Hà Nội - Amsterdam</option>
+                        </select>
+                        <p class="text-[11px] text-slate-500 mt-1">Nơi User được thừa hưởng các chính sách hợp đồng chung.</p>
+                    </div>
+
+                    <div id="inheritedTenantsContainer" class="hidden">
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">Tenant kế thừa tự động</label>
+                        <div class="p-3 bg-indigo-50 border border-indigo-100 rounded-lg">
+                            <p class="text-xs text-indigo-700 mb-2">ℹ Khi trường được chọn, các tenant sau sẽ được gán tự động dựa theo hợp đồng đang hoạt động:</p>
+                            <div class="flex flex-wrap gap-2" id="inheritedTenantBadges">
+                                <span class="px-2.5 py-1 text-xs font-semibold bg-indigo-100 text-indigo-700 rounded-md border border-indigo-200">STEM</span>
+                                <span class="px-2.5 py-1 text-xs font-semibold bg-orange-100 text-orange-700 rounded-md border border-orange-200">ENGLISH</span>
+                            </div>
+                            <p class="text-[10px] text-slate-400 mt-2">Admin có thể điều chỉnh thủ công sau khi tạo (tab Tenant Assignment).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="border-slate-200">
+
+            <div>
+                <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs">2</span>
+                    Hồ sơ & Đăng nhập
+                </h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">Họ và Tên <span class="text-red-500">*</span></label>
+                        <input type="text" placeholder="Nhập họ tên đầy đủ" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1.5">Tên đăng nhập (Username) <span class="text-red-500">*</span></label>
+                            <input type="text" placeholder="VD: nguyenvan.a" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1.5">Mật khẩu <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <input type="password" placeholder="••••••••" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                                <button class="absolute right-3 top-2.5 text-slate-400 hover:text-blue-600 text-xs font-medium">Tạo ngẫu nhiên</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1.5">Email liên hệ</label>
+                            <input type="email" placeholder="email@domain.com" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1.5">Số điện thoại</label>
+                            <input type="tel" placeholder="090x xxx xxx" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        
+        <div class="p-6 border-t border-slate-200 bg-white flex gap-4">
+            <button onclick="closeDrawer()" class="flex-1 bg-white border border-slate-300 text-slate-700 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-50 transition">Hủy bỏ</button>
+            <button class="flex-1 bg-blue-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition shadow-lg shadow-blue-200">Lưu người dùng</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const drawerWrapper = document.getElementById('userDrawer');
+    const drawerContent = document.getElementById('drawerContent');
+    const accountTypeSelect = document.getElementById('accountTypeSelect');
+    const homeSchoolContainer = document.getElementById('homeSchoolContainer');
+    const homeSchoolSelect = document.getElementById('homeSchoolSelect');
+
+    // Mở Drawer
+    function openDrawer() {
+        drawerWrapper.classList.remove('hidden');
+        setTimeout(() => {
+            drawerContent.classList.remove('translate-x-full');
+            drawerContent.classList.add('translate-x-0');
+        }, 10);
+    }
+
+    // Đóng Drawer
+    function closeDrawer() {
+        drawerContent.classList.remove('translate-x-0');
+        drawerContent.classList.add('translate-x-full');
+        setTimeout(() => {
+            drawerWrapper.classList.add('hidden');
+        }, 300);
+    }
+
+    // Logic Ẩn/Hiện Trường học (Home School) dựa trên Account Type
+    function handleAccountTypeChange() {
+        const type = accountTypeSelect.value;
+        const inheritedTenantsContainer = document.getElementById('inheritedTenantsContainer');
+        // Nếu là Admin tổng hoặc Admin mảng -> Không bắt buộc gắn vào trường vật lý
+        if (type === 'LMS_ADMIN' || type === 'TENANT_ADMIN') {
+            homeSchoolSelect.value = ""; // Clear lựa chọn
+            homeSchoolSelect.disabled = true;
+            homeSchoolContainer.style.opacity = '0.5';
+            homeSchoolSelect.classList.add('cursor-not-allowed', 'bg-slate-100');
+            if (inheritedTenantsContainer) inheritedTenantsContainer.classList.add('hidden');
+        } else {
+            // Là Giáo viên, Admin trường -> Cho phép chọn trường
+            homeSchoolSelect.disabled = false;
+            homeSchoolContainer.style.opacity = '1';
+            homeSchoolSelect.classList.remove('cursor-not-allowed', 'bg-slate-100');
+        }
+    }
+
+    // Hiện tenant kế thừa khi chọn trường
+    homeSchoolSelect.addEventListener('change', function() {
+        const inheritedTenantsContainer = document.getElementById('inheritedTenantsContainer');
+        if (this.value && !homeSchoolSelect.disabled) {
+            inheritedTenantsContainer.classList.remove('hidden');
+        } else {
+            inheritedTenantsContainer.classList.add('hidden');
+        }
+    });
+
+    // Chạy logic check lần đầu khi load
+    handleAccountTypeChange();
+</script>
+
+</body>
+</html>

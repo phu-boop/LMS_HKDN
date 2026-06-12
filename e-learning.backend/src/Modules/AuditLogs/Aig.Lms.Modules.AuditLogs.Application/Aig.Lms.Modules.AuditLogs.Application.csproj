@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Aig.Lms.Modules.AuditLogs.Domain\Aig.Lms.Modules.AuditLogs.Domain.csproj"/>
+        <ProjectReference Include="..\..\..\BuildingBlocks\Aig.Lms.BuildingBlocks.Application\Aig.Lms.BuildingBlocks.Application.csproj"/>
+    </ItemGroup>
+
+</Project>

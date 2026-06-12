@@ -1,0 +1,44 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.4">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="FluentAssertions" Version="8.3.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="NSubstitute" Version="5.3.0" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\Modules\Identity\Aig.Lms.Modules.Identity.Application\Aig.Lms.Modules.Identity.Application.csproj" />
+    <ProjectReference Include="..\..\..\src\Modules\Identity\Aig.Lms.Modules.Identity.Domain\Aig.Lms.Modules.Identity.Domain.csproj" />
+    <ProjectReference Include="..\..\..\src\Modules\Authorization\Aig.Lms.Modules.Authorization.Application\Aig.Lms.Modules.Authorization.Application.csproj" />
+    <ProjectReference Include="..\..\..\src\Modules\Authorization\Aig.Lms.Modules.Authorization.Domain\Aig.Lms.Modules.Authorization.Domain.csproj" />
+    <ProjectReference Include="..\..\..\src\Modules\Authorization\Aig.Lms.Modules.Authorization.Infrastructure\Aig.Lms.Modules.Authorization.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\..\src\Api\Aig.Lms.Api\Aig.Lms.Api.csproj" />
+    <ProjectReference Include="..\..\..\src\Modules\Users\Aig.Lms.Modules.Users.Application\Aig.Lms.Modules.Users.Application.csproj" />
+    <ProjectReference Include="..\..\..\src\Modules\Users\Aig.Lms.Modules.Users.Domain\Aig.Lms.Modules.Users.Domain.csproj" />
+    <ProjectReference Include="..\..\..\src\Modules\Tenancy\Aig.Lms.Modules.Tenancy.Application\Aig.Lms.Modules.Tenancy.Application.csproj" />
+    <ProjectReference Include="..\..\..\src\Modules\Tenancy\Aig.Lms.Modules.Tenancy.Domain\Aig.Lms.Modules.Tenancy.Domain.csproj" />
+    <ProjectReference Include="..\..\..\src\Modules\Schools\Aig.Lms.Modules.Schools.Application\Aig.Lms.Modules.Schools.Application.csproj" />
+    <ProjectReference Include="..\..\..\src\Modules\Schools\Aig.Lms.Modules.Schools.Domain\Aig.Lms.Modules.Schools.Domain.csproj" />
+    <ProjectReference Include="..\..\..\src\Modules\Catalog\Aig.Lms.Modules.Catalog.Application\Aig.Lms.Modules.Catalog.Application.csproj" />
+    <ProjectReference Include="..\..\..\src\Modules\Catalog\Aig.Lms.Modules.Catalog.Domain\Aig.Lms.Modules.Catalog.Domain.csproj" />
+
+  </ItemGroup>
+
+</Project>

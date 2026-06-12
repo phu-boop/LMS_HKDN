@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Nội dung - STEM Education</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .drawer-shadow { background: rgba(0, 0, 0, 0.4); }
+        
+        /* Tùy chỉnh thanh cuộn */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Animation cho Toggle Switch */
+        .toggle-checkbox:checked { right: 0; border-color: #10b981; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #10b981; }
+        .toggle-checkbox { right: 4px; z-index: 1; border-color: #e2e8f0; transition: all 0.3s; }
+        .toggle-label { background-color: #cbd5e1; transition: all 0.3s; }
+        
+        /* Dropzone Hover State */
+        .dropzone.dragover { background-color: #ecfdf5; border-color: #10b981; }
+    </style>
+</head>
+<body>
+
+<div class="flex min-h-screen">
+    <div class="w-64 bg-emerald-900 text-white p-6 hidden md:flex flex-col flex-shrink-0">
+        <div class="flex items-center gap-3 mb-8">
+            <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-emerald-900 font-bold">S</div>
+            <div class="text-xl font-bold tracking-wide">STEM Edu</div>
+        </div>
+        <nav class="space-y-3 flex-1">
+            <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-emerald-800 text-emerald-100">Dashboard</a>
+            <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-emerald-800 text-emerald-100">Cây Học Liệu</a>
+            <a href="#" class="block py-2.5 px-4 rounded bg-emerald-600 text-white font-medium shadow-md shadow-emerald-900/50">Quản lý Nội dung</a>
+            <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-emerald-800 text-emerald-100">Phân quyền Nội dung</a>
+            <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-emerald-800 text-emerald-100">Người dùng (Roles)</a>
+        </nav>
+    </div>
+
+    <div class="flex-1 p-8 overflow-hidden flex flex-col h-screen">
+        
+        <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800">Kho Học liệu (Content CMS)</h1>
+                <p class="text-sm text-slate-500 mt-1">Tải lên, quản lý và cấu hình bảo mật cho tài liệu giảng dạy</p>
+            </div>
+            <div class="flex gap-3">
+                <div class="relative">
+                    <input type="text" placeholder="Tìm kiếm học liệu..." class="pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none w-64">
+                    <span class="absolute left-3 top-2.5 text-slate-400">🔍</span>
+                </div>
+                <button onclick="openUploadDrawer()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition shadow-sm flex items-center gap-2">
+                    <span>⬆️ Tải tài liệu lên</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="flex flex-1 gap-6 overflow-hidden">
+            
+            <div class="w-1/4 bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden">
+                <div class="p-4 border-b border-slate-200 bg-slate-50">
+                    <h3 class="font-bold text-slate-700 text-sm">Duyệt theo Thư mục</h3>
+                </div>
+                <div class="p-4 overflow-y-auto flex-1 text-sm">
+                    <ul class="space-y-2">
+                        <li class="font-semibold text-slate-800">Khối 10</li>
+                        <ul class="pl-4 space-y-1 mt-1 border-l-2 border-slate-100">
+                            <li class="text-slate-600 hover:text-emerald-600 cursor-pointer py-1">Lập trình Scratch</li>
+                            <li class="text-emerald-600 font-medium bg-emerald-50 rounded px-2 py-1 cursor-pointer">Lập trình Python</li>
+                            <ul class="pl-4 space-y-1 mt-1">
+                                <li class="text-emerald-700 font-bold flex items-center gap-2 before:content-['•'] before:text-emerald-400">Bài 1: Giới thiệu</li>
+                                <li class="text-slate-500 hover:text-emerald-600 flex items-center gap-2 cursor-pointer before:content-['•'] before:text-slate-300">Bài 2: Vòng lặp</li>
+                            </ul>
+                        </ul>
+                        <li class="font-semibold text-slate-800 mt-4">Khối 11</li>
+                        <ul class="pl-4 space-y-1 mt-1 border-l-2 border-slate-100">
+                            <li class="text-slate-600 hover:text-emerald-600 cursor-pointer py-1">Trí tuệ nhân tạo (AI)</li>
+                        </ul>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="w-3/4 bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden">
+                <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                    <div class="text-sm text-slate-500">Đang hiển thị thư mục: <span class="font-bold text-slate-800">Bài 1: Giới thiệu (Python)</span></div>
+                    <div class="text-sm font-medium text-slate-700">3 tài liệu</div>
+                </div>
+                
+                <div class="overflow-y-auto flex-1 p-4">
+                    <div class="grid grid-cols-1 gap-4">
+                        
+                        <div class="border border-slate-200 rounded-lg p-4 flex gap-4 hover:border-emerald-300 transition group bg-white">
+                            <div class="w-32 h-20 bg-slate-800 rounded-md relative flex-shrink-0 overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1526379095098-d400fd0bf935?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" alt="Thumb" class="w-full h-full object-cover opacity-70">
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <span class="w-8 h-8 bg-white/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white text-xs">▶</span>
+                                </div>
+                                <div class="absolute bottom-1 right-1 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded font-mono">15:24</div>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="px-2 py-0.5 text-[10px] font-bold bg-blue-100 text-blue-700 rounded border border-blue-200">VIDEO</span>
+                                            <h3 class="font-bold text-slate-800">1. Video Bài giảng: Cài đặt Python</h3>
+                                        </div>
+                                        <p class="text-xs text-slate-500 line-clamp-1">Hướng dẫn chi tiết cách tải và cài đặt môi trường Python 3.10.</p>
+                                    </div>
+                                    <span class="px-2.5 py-1 text-[11px] font-medium bg-emerald-100 text-emerald-700 rounded-full border border-emerald-200">Đã xuất bản</span>
+                                </div>
+                                <div class="flex items-center gap-4 mt-3 text-xs text-slate-500">
+                                    <div class="flex items-center gap-1" title="Bảo vệ bằng Watermark">🛡️ Watermark: <span class="text-emerald-600 font-medium">Bật</span></div>
+                                    <div class="flex items-center gap-1" title="Cho phép tải xuống">⬇️ Tải xuống: <span class="text-red-500 font-medium">Tắt</span></div>
+                                    <div class="text-slate-400">• Tải lên: 20/04/2026</div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col justify-center opacity-0 group-hover:opacity-100 transition border-l border-slate-100 pl-4">
+                                <button onclick="openUploadDrawer(true)" class="text-emerald-600 hover:bg-emerald-50 p-2 rounded text-sm font-medium transition">✏️ Sửa</button>
+                                <button class="text-red-500 hover:bg-red-50 p-2 rounded text-sm font-medium transition mt-1">🗑️ Xóa</button>
+                            </div>
+                        </div>
+
+                        <div class="border border-slate-200 rounded-lg p-4 flex gap-4 hover:border-emerald-300 transition group bg-white">
+                            <div class="w-32 h-20 bg-red-50 border border-red-100 rounded-md flex items-center justify-center flex-shrink-0 text-red-400 flex-col">
+                                <span class="text-2xl">📄</span>
+                                <span class="text-[10px] font-bold mt-1">PDF</span>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="px-2 py-0.5 text-[10px] font-bold bg-red-100 text-red-700 rounded border border-red-200">DOCUMENT</span>
+                                            <h3 class="font-bold text-slate-800">2. Slide Bài giảng (Bản PDF)</h3>
+                                        </div>
+                                        <p class="text-xs text-slate-500 line-clamp-1">Slide tổng hợp kiến thức từ Video bài 1.</p>
+                                    </div>
+                                    <span class="px-2.5 py-1 text-[11px] font-medium bg-emerald-100 text-emerald-700 rounded-full border border-emerald-200">Đã xuất bản</span>
+                                </div>
+                                <div class="flex items-center gap-4 mt-3 text-xs text-slate-500">
+                                    <div class="flex items-center gap-1">🛡️ Watermark: <span class="text-emerald-600 font-medium">Bật</span></div>
+                                    <div class="flex items-center gap-1">⬇️ Tải xuống: <span class="text-emerald-600 font-medium">Bật</span></div>
+                                    <div class="text-slate-400">• Tải lên: 20/04/2026</div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col justify-center opacity-0 group-hover:opacity-100 transition border-l border-slate-100 pl-4">
+                                <button class="text-emerald-600 hover:bg-emerald-50 p-2 rounded text-sm font-medium transition">✏️ Sửa</button>
+                                <button class="text-red-500 hover:bg-red-50 p-2 rounded text-sm font-medium transition mt-1">🗑️ Xóa</button>
+                            </div>
+                        </div>
+
+                        <div class="border border-slate-200 rounded-lg p-4 flex gap-4 hover:border-emerald-300 transition group bg-slate-50">
+                            <div class="w-32 h-20 bg-slate-200 rounded-md flex items-center justify-center flex-shrink-0 text-slate-400">
+                                <span class="text-2xl">⏳</span>
+                            </div>
+                            <div class="flex-1 opacity-70">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="px-2 py-0.5 text-[10px] font-bold bg-amber-100 text-amber-700 rounded border border-amber-200">ASSIGNMENT</span>
+                                            <h3 class="font-bold text-slate-800">3. Bài tập Thực hành Lab 1</h3>
+                                        </div>
+                                        <p class="text-xs text-slate-500 line-clamp-1">File nén chứa dataset thực hành.</p>
+                                    </div>
+                                    <span class="px-2.5 py-1 text-[11px] font-medium bg-slate-200 text-slate-700 rounded-full border border-slate-300">Bản nháp (Draft)</span>
+                                </div>
+                                <div class="flex items-center gap-4 mt-3 text-xs text-slate-500">
+                                    <div class="text-amber-600 font-medium font-mono">Lịch Publish: 25/04/2026 08:00</div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col justify-center opacity-0 group-hover:opacity-100 transition border-l border-slate-100 pl-4">
+                                <button class="text-emerald-600 hover:bg-emerald-50 p-2 rounded text-sm font-medium transition">✏️ Sửa</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="uploadDrawer" class="fixed inset-0 hidden z-50">
+    <div class="fixed inset-0 drawer-shadow backdrop-blur-sm transition-opacity" onclick="closeUploadDrawer()"></div>
+    
+    <div class="fixed right-0 top-0 bottom-0 w-full max-w-xl bg-white shadow-2xl flex flex-col transition-transform duration-300 translate-x-full" id="drawerContent">
+        
+        <div class="p-6 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+            <div>
+                <h2 class="text-xl font-bold text-slate-800" id="drawerTitle">Tải lên Học liệu mới</h2>
+                <p class="text-xs text-slate-500 mt-1">Thư mục đích: <span class="font-bold text-emerald-600">Khối 10 > Bài 1: Giới thiệu</span></p>
+            </div>
+            <button onclick="closeUploadDrawer()" class="text-slate-400 hover:text-slate-700 text-2xl transition">&times;</button>
+        </div>
+        
+        <div class="p-6 flex-1 overflow-y-auto space-y-8">
+            
+            <div>
+                <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-3">Tập tin nguồn</h3>
+                <div id="dropzone" class="dropzone border-2 border-dashed border-slate-300 rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition hover:bg-slate-50">
+                    <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-xl mb-3 shadow-sm">
+                        ☁️
+                    </div>
+                    <p class="text-sm font-bold text-slate-700">Kéo thả Video hoặc PDF vào đây</p>
+                    <p class="text-xs text-slate-500 mt-1 mb-4">hoặc <span class="text-emerald-600 font-medium">Bấm vào đây</span> để duyệt file từ máy tính</p>
+                    <div class="flex gap-2">
+                        <span class="px-2 py-1 bg-slate-100 text-slate-500 rounded text-[10px] font-mono">.mp4 (Max 2GB)</span>
+                        <span class="px-2 py-1 bg-slate-100 text-slate-500 rounded text-[10px] font-mono">.pdf (Max 50MB)</span>
+                    </div>
+                </div>
+                
+                <div id="uploadProgress" class="hidden mt-4 p-4 border border-emerald-200 bg-emerald-50 rounded-lg flex items-center gap-4">
+                    <div class="text-xl">🎥</div>
+                    <div class="flex-1">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="font-bold text-slate-700 truncate w-48">bai_giang_python_01.mp4</span>
+                            <span class="text-emerald-600 font-medium">Đã tải lên 100%</span>
+                        </div>
+                        <div class="w-full bg-slate-200 rounded-full h-1.5">
+                            <div class="bg-emerald-500 h-1.5 rounded-full w-full"></div>
+                        </div>
+                    </div>
+                    <button class="text-slate-400 hover:text-red-500" title="Xóa file">✖</button>
+                </div>
+            </div>
+
+            <hr class="border-slate-200">
+
+            <div>
+                <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-3">Thông tin hiển thị</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">Tiêu đề học liệu <span class="text-red-500">*</span></label>
+                        <input type="text" id="contentTitle" placeholder="Ví dụ: Video Bài giảng 1..." class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">Mô tả tóm tắt</label>
+                        <textarea rows="3" placeholder="Nhập tóm tắt nội dung để học sinh dễ nắm bắt..." class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="border-slate-200">
+
+            <div>
+                <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-3">Bảo mật & Trải nghiệm</h3>
+                
+                <div class="space-y-4 p-4 border border-slate-200 rounded-xl bg-slate-50/50">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-bold text-slate-800">Kích hoạt Dynamic Watermark</p>
+                            <p class="text-xs text-slate-500">In mờ Tên và IP của người xem lên Video/PDF để chống quay lén.</p>
+                        </div>
+                        <div class="relative inline-block w-12 h-6 align-middle select-none transition duration-200 ease-in">
+                            <input type="checkbox" name="toggle" id="watermarkToggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" checked/>
+                            <label for="watermarkToggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                        </div>
+                    </div>
+                    
+                    <div class="h-px bg-slate-200"></div>
+                    
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-bold text-slate-800">Cho phép Tải xuống (Download)</p>
+                            <p class="text-xs text-slate-500">Học sinh có thể tải file gốc về máy tính. (Không khuyến nghị cho Video)</p>
+                        </div>
+                        <div class="relative inline-block w-12 h-6 align-middle select-none transition duration-200 ease-in">
+                            <input type="checkbox" name="toggle" id="downloadToggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                            <label for="downloadToggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="border-slate-200">
+
+            <div>
+                <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-3 flex justify-between items-center">
+                    <span>Lịch trình hiển thị (Tùy chọn)</span>
+                    <span class="px-2 py-0.5 bg-blue-100 text-blue-700 text-[10px] rounded">Drip Content</span>
+                </h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700 mb-1.5">Mở khóa từ ngày (Từ)</label>
+                        <input type="datetime-local" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700 mb-1.5">Khóa lại sau ngày (Đến)</label>
+                        <input type="datetime-local" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none bg-white">
+                    </div>
+                </div>
+                <p class="text-[11px] text-slate-500 mt-2">Bỏ trống nếu muốn học liệu luôn luôn hiển thị sau khi Publish.</p>
+            </div>
+
+        </div>
+        
+        <div class="p-6 border-t border-slate-200 bg-white flex gap-3">
+            <button onclick="closeUploadDrawer()" class="flex-1 bg-white border border-slate-300 text-slate-700 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-50 transition">Hủy</button>
+            <button class="flex-1 bg-slate-800 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-slate-900 transition shadow-md">Lưu Nháp (Draft)</button>
+            <button class="flex-[1.5] bg-emerald-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-emerald-700 transition shadow-lg shadow-emerald-200">Xuất bản ngay (Publish)</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const drawerWrapper = document.getElementById('uploadDrawer');
+    const drawerContent = document.getElementById('drawerContent');
+    const dropzone = document.getElementById('dropzone');
+    const uploadProgress = document.getElementById('uploadProgress');
+
+    // Drawer Logic
+    function openUploadDrawer(isEdit = false) {
+        if(isEdit) {
+            document.getElementById('drawerTitle').innerText = 'Chỉnh sửa Học liệu';
+            document.getElementById('contentTitle').value = '1. Video Bài giảng: Cài đặt Python';
+            dropzone.classList.add('hidden');
+            uploadProgress.classList.remove('hidden');
+        } else {
+            document.getElementById('drawerTitle').innerText = 'Tải lên Học liệu mới';
+            document.getElementById('contentTitle').value = '';
+            dropzone.classList.remove('hidden');
+            uploadProgress.classList.add('hidden');
+        }
+
+        drawerWrapper.classList.remove('hidden');
+        setTimeout(() => {
+            drawerContent.classList.remove('translate-x-full');
+            drawerContent.classList.add('translate-x-0');
+        }, 10);
+    }
+
+    function closeUploadDrawer() {
+        drawerContent.classList.remove('translate-x-0');
+        drawerContent.classList.add('translate-x-full');
+        setTimeout(() => {
+            drawerWrapper.classList.add('hidden');
+        }, 300);
+    }
+
+    // Drag & Drop UI Logic
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropzone.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropzone.addEventListener(eventName, () => dropzone.classList.add('dragover'), false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropzone.addEventListener(eventName, () => dropzone.classList.remove('dragover'), false);
+    });
+
+    // Giả lập thả file thành công
+    dropzone.addEventListener('drop', (e) => {
+        dropzone.classList.add('hidden');
+        uploadProgress.classList.remove('hidden');
+        document.getElementById('contentTitle').value = 'bai_giang_python_01.mp4';
+    });
+</script>
+
+</body>
+</html>

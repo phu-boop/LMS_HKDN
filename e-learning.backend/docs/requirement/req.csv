@@ -1,0 +1,25 @@
+﻿Section,No,Chức năng,Mô tả chi tiết
+I. Module dành cho Quản trị Hệ thống,1,Quản lý danh sách Trường học,"- Quản lý thông tin định danh: tên trường, địa chỉ, MST,…
+- Thiết lập thời hạn sử dụng theo hợp đồng: từ ngày – đến ngày"
+I. Module dành cho Quản trị Hệ thống,2,Quản lý tài khoản (User) - ADMIN LMS,"- Quản lý thông tin tài khoản: Tên tài khoản, Mật khẩu, Họ tên, Trường học, Email, Ảnh đại diện…
+- Loại tài khoản: Quản trị theo tenant/Trường học
+- Cấu hình Concurrent Login: Thiết lập số thiết bị tối đa được phép đăng nhập đồng thời trên một tài khoản."
+I. Module dành cho Quản trị Hệ thống,3,Quản lý tenant,"Quản lý domain, thiết lập logo theo tenant.
+(VD: stem.lms.vn, cds.lms.vn, kns.lms.vn…)"
+I. Module dành cho Quản trị Hệ thống,4,Quản lý phân quyền,"Cho phép phân quyền theo tài khoản
+- Phân quyền Tenant: (STEM, English, KNS...).
+- Phân quyền nội dung tài liệu: Kiểm soát quyền thao tác (Xem, Download, Comment) theo từng cấp bậc (Chương trình > Khối > Lớp > Môn học > Bài học)"
+I. Module dành cho Quản trị Hệ thống,5,Quản lý Master data,"- Thiết lập cấu trúc sơ đồ bài giảng linh hoạt: Chương trình > Khối > Lớp > Môn học > Bài học.
+- Quản lý các danh mục dùng chung toàn hệ thống."
+I. Module dành cho Quản trị Hệ thống,6,Hệ thống quản trị nội dung - CMS,"- Upload và quản lý đa phương tiện: Video (HLS), PDF, Slide, word, URL.
+- Upload theo cấu trúc: Chương trình > Khối > Lớp > Môn học > Bài học.
+- Cấu hình thuộc tính bảo mật (Watermark, Signed URL) và quyền tương tác (Comment, Download)."
+I. Module dành cho Quản trị Hệ thống,8,Hệ thống audit log,"- Truy vết toàn bộ lịch sử thao tác của người dùng: Đăng nhập, Xem bài giảng, Tải tài liệu, Thay đổi dữ liệu.
+- Hỗ trợ lọc và xuất báo cáo dữ liệu thô lịch sử thao tác."
+I. Module dành cho Quản trị Hệ thống,9,Báo cáo & Thống kê,- Thống kê số lượng user online thực tế.
+II. Module dành cho Client - Trường học,1,Trình phát bài giảng (E-Learning Viewer),"- Video Security: Tích hợp công nghệ giải mã HLS, ngăn chặn tải lậu bằng extension/phần mềm bên thứ 3.
+- Document Viewer: Trình xem PDF/Slide chuyên dụng, chặn chuột phải, chặn phím tắt chụp màn hình PrtSc (Print Screen).
+- Giao diện lớp học: Chế độ toàn màn hình (Full-screen) tối ưu cho việc trình chiếu tại trường."
+II. Module dành cho Client - Trường học,2,Bảo mật nội dung động (Security Features),"- Dynamic Watermark: Hiển thị mờ thông tin người xem (Tên công ty/Tên tài khoản/thời gian) trên Tài liệu theo thời gian thực.
+- Secure Download: Chỉ cho phép tải bài giảng/giáo án khi được cấp quyền, và tài liệu có thuộc tính cho phép Download."
+II. Module dành cho Client - Trường học,3,Quản lý kho học liệu cá nhân,- Giúp người dùng lưu trữ các bài giảng yêu thích hoặc bài giảng thường xuyên sử dụng để truy cập nhanh.

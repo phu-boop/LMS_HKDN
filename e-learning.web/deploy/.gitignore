@@ -1,0 +1,22 @@
+# Deploy environment files (keep secret)
+.env
+.env.dev
+.env.prod
+.env.*.local
+
+# Docker volumes backup
+*.tar.gz
+
+# SSL certificates (store securely outside repo)
+ssl/
+*.crt
+*.key
+*.pem
+
+# Build artifacts
+docker/cache/
+build/
+
+# System files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Dapper" Version="2.1.66"/>
+        <PackageReference Include="Npgsql" Version="9.0.3"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Aig.Lms.Modules.Tenancy.Application\Aig.Lms.Modules.Tenancy.Application.csproj"/>
+        <ProjectReference Include="..\..\..\BuildingBlocks\Aig.Lms.BuildingBlocks.Contracts\Aig.Lms.BuildingBlocks.Contracts.csproj"/>
+    </ItemGroup>
+
+</Project>

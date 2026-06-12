@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.0" />
+      <PackageReference Include="Minio" Version="7.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Aig.Lms.BuildingBlocks.Application\Aig.Lms.BuildingBlocks.Application.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Caching\" />
+      <Folder Include="Identity\" />
+      <Folder Include="Messaging\" />
+      <Folder Include="Observability\" />
+      <Folder Include="Persistence\" />
+      <Folder Include="Storage\" />
+      <Folder Include="Time\" />
+    </ItemGroup>
+
+</Project>

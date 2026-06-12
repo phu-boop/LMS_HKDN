@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Trường học - LMS Admin Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .drawer-shadow { background: rgba(0, 0, 0, 0.4); }
+        
+        /* Tùy chỉnh thanh cuộn cho đẹp hơn */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body>
+
+<div class="flex min-h-screen">
+    <div class="w-64 bg-slate-900 text-white p-6 hidden md:block flex-shrink-0">
+        <div class="text-2xl font-bold mb-8 text-blue-400">AIG LMS</div>
+        <nav class="space-y-4">
+            <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-slate-800 text-slate-400">Dashboard</a>
+            <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-slate-800 text-slate-400">Quản lý Tenant</a>
+            <a href="#" class="block py-2.5 px-4 rounded bg-blue-600 text-white font-medium shadow-md shadow-blue-900/50">Trường học</a>
+            <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-slate-800 text-slate-400">Hợp đồng</a>
+            <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-slate-800 text-slate-400">Audit Logs</a>
+        </nav>
+    </div>
+
+    <div class="flex-1 p-8 overflow-x-hidden flex flex-col h-screen">
+        
+        <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800">Danh sách Trường học</h1>
+                <p class="text-sm text-slate-500 mt-1">Quản lý hồ sơ khách hàng và thông tin liên hệ vận hành</p>
+            </div>
+            <div class="flex gap-3">
+                <div class="relative">
+                    <input type="text" placeholder="Tìm kiếm trường..." class="pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none w-64">
+                    <span class="absolute left-3 top-2.5 text-slate-400">🔍</span>
+                </div>
+                <button onclick="openDrawer('new')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition shadow-sm">
+                    + Thêm Trường mới
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 flex-1 overflow-hidden flex flex-col">
+            <div class="overflow-x-auto flex-1">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
+                        <tr>
+                            <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Mã / Tên trường</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Khu vực</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Người liên hệ (POC)</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Trạng thái</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200">
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="px-6 py-4">
+                                <div class="font-medium text-slate-800">THPT Lê Hồng Phong</div>
+                                <div class="text-xs font-mono text-slate-500 mt-0.5">LHP-HCM</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-sm text-slate-700">Hồ Chí Minh</div>
+                                <div class="text-xs text-slate-500">Quận 5</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-sm text-slate-700 font-medium">Nguyễn Văn A</div>
+                                <div class="text-xs text-slate-500">0909 123 456</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="px-2.5 py-1 text-xs font-medium bg-emerald-100 text-emerald-700 rounded-full border border-emerald-200">Active</span>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <button onclick="openDrawer('edit')" class="text-blue-600 hover:text-blue-800 font-medium text-sm px-3 py-1 bg-blue-50 hover:bg-blue-100 rounded transition">Chi tiết</button>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="px-6 py-4">
+                                <div class="font-medium text-slate-800">THPT Chuyên Hà Nội - Amsterdam</div>
+                                <div class="text-xs font-mono text-slate-500 mt-0.5">AMS-HN</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-sm text-slate-700">Hà Nội</div>
+                                <div class="text-xs text-slate-500">Cầu Giấy</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-sm text-slate-700 font-medium">Trần Thị B</div>
+                                <div class="text-xs text-slate-500">0988 765 432</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="px-2.5 py-1 text-xs font-medium bg-emerald-100 text-emerald-700 rounded-full border border-emerald-200">Active</span>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <button onclick="openDrawer('edit')" class="text-blue-600 hover:text-blue-800 font-medium text-sm px-3 py-1 bg-blue-50 hover:bg-blue-100 rounded transition">Chi tiết</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-between items-center text-sm text-slate-500">
+                <div>Hiển thị 1 - 10 trong số 480 trường</div>
+                <div class="flex gap-2">
+                    <button class="px-3 py-1 border border-slate-300 rounded bg-white hover:bg-slate-50 disabled:opacity-50" disabled>Trước</button>
+                    <button class="px-3 py-1 border border-slate-300 rounded bg-white hover:bg-slate-50">Sau</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="schoolDrawer" class="fixed inset-0 hidden z-50">
+    <div class="fixed inset-0 drawer-shadow backdrop-blur-sm transition-opacity" onclick="closeDrawer()"></div>
+    
+    <div class="fixed right-0 top-0 bottom-0 w-full max-w-lg bg-white shadow-2xl flex flex-col transition-transform duration-300 translate-x-full" id="drawerContent">
+        
+        <div class="p-6 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+            <div>
+                <h2 class="text-xl font-bold text-slate-800" id="drawerTitle">Thêm Trường học mới</h2>
+                <p class="text-xs text-slate-500 mt-1">Điền đầy đủ thông tin định danh và liên hệ</p>
+            </div>
+            <button onclick="closeDrawer()" class="text-slate-400 hover:text-slate-700 text-2xl transition">&times;</button>
+        </div>
+        
+        <div class="p-6 flex-1 overflow-y-auto space-y-8">
+            
+            <div>
+                <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs">1</span>
+                    Thông tin định danh
+                </h3>
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1.5">Mã trường (Code) <span class="text-red-500">*</span></label>
+                            <input type="text" placeholder="VD: LHP-HCM" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1.5">Mã số thuế</label>
+                            <input type="text" placeholder="Nhập MST" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">Tên trường chính thức <span class="text-red-500">*</span></label>
+                        <input type="text" placeholder="VD: THPT Lê Hồng Phong" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                </div>
+            </div>
+
+            <hr class="border-slate-200">
+
+            <div>
+                <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs">2</span>
+                    Vị trí địa lý
+                </h3>
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1.5">Tỉnh / Thành phố</label>
+                            <select class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                                <option value="">Chọn Tỉnh/Thành</option>
+                                <option value="HCM">Hồ Chí Minh</option>
+                                <option value="HN">Hà Nội</option>
+                                <option value="DN">Đà Nẵng</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1.5">Quận / Huyện</label>
+                            <select class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                                <option value="">Chọn Quận/Huyện</option>
+                                <option value="Q5">Quận 5</option>
+                                <option value="Q1">Quận 1</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">Địa chỉ chi tiết</label>
+                        <input type="text" placeholder="Số nhà, Tên đường, Phường/Xã..." class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                </div>
+            </div>
+
+            <hr class="border-slate-200">
+
+            <div>
+                <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs">3</span>
+                    Người liên hệ vận hành (POC)
+                </h3>
+                <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100 space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">Họ và Tên</label>
+                        <input type="text" placeholder="Nhập họ tên người phụ trách" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1.5">Điện thoại</label>
+                            <input type="tel" placeholder="090x xxx xxx" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
+                            <input type="email" placeholder="email@truong.edu.vn" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        
+        <div class="p-6 border-t border-slate-200 bg-white flex gap-4">
+            <button onclick="closeDrawer()" class="flex-1 bg-white border border-slate-300 text-slate-700 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-50 transition">Hủy bỏ</button>
+            <button class="flex-1 bg-blue-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition shadow-lg shadow-blue-200">Lưu thông tin</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Xử lý logic trượt Drawer mượt mà
+    const drawerWrapper = document.getElementById('schoolDrawer');
+    const drawerContent = document.getElementById('drawerContent');
+    const drawerTitle = document.getElementById('drawerTitle');
+
+    function openDrawer(mode) {
+        // Đổi title dựa theo hành động Thêm mới hay Sửa
+        if(mode === 'edit') {
+            drawerTitle.innerText = 'Chi tiết Trường học';
+        } else {
+            drawerTitle.innerText = 'Thêm Trường học mới';
+        }
+
+        drawerWrapper.classList.remove('hidden');
+        // Cho trình duyệt 1 nhịp tick để render xong display block rồi mới chạy animation translate
+        setTimeout(() => {
+            drawerContent.classList.remove('translate-x-full');
+            drawerContent.classList.add('translate-x-0');
+        }, 10);
+    }
+
+    function closeDrawer() {
+        drawerContent.classList.remove('translate-x-0');
+        drawerContent.classList.add('translate-x-full');
+        
+        // Đợi animation trượt xong mới ẩn HTML
+        setTimeout(() => {
+            drawerWrapper.classList.add('hidden');
+        }, 300);
+    }
+</script>
+
+</body>
+</html>
