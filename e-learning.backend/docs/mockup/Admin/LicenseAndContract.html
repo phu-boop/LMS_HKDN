@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Hợp đồng - LMS Admin Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .drawer-shadow { background: rgba(0, 0, 0, 0.4); }
+        
+        /* Tùy chỉnh thanh cuộn */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Custom Radio Card Style */
+        .radio-card-input:checked + .radio-card-body {
+            border-color: #2563eb;
+            background-color: #eff6ff;
+        }
+        .radio-card-input:checked + .radio-card-body .radio-indicator {
+            border-color: #2563eb;
+            border-width: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="flex min-h-screen">
+    <div class="w-64 bg-slate-900 text-white p-6 hidden md:block flex-shrink-0">
+        <div class="text-2xl font-bold mb-8 text-blue-400">AIG LMS</div>
+        <nav class="space-y-4">
+            <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-slate-800 text-slate-400">Dashboard</a>
+            <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-slate-800 text-slate-400">Quản lý Tenant</a>
+            <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-slate-800 text-slate-400">Trường học</a>
+            <a href="#" class="block py-2.5 px-4 rounded bg-blue-600 text-white font-medium shadow-md shadow-blue-900/50">Cấp phép & Hợp đồng</a>
+            <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-slate-800 text-slate-400">Audit Logs</a>
+        </nav>
+    </div>
+
+    <div class="flex-1 p-8 overflow-x-hidden flex flex-col h-screen">
+        
+        <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800">Cấp phép & Hợp đồng</h1>
+                <p class="text-sm text-slate-500 mt-1">Quản lý việc phân bổ mảng giảng dạy và giới hạn truy cập cho các Trường</p>
+            </div>
+            <div class="flex gap-3">
+                <div class="relative">
+                    <input type="text" placeholder="Tìm kiếm trường, tenant..." class="pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none w-64">
+                    <span class="absolute left-3 top-2.5 text-slate-400">🔍</span>
+                </div>
+                <button onclick="openDrawer()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition shadow-sm">
+                    + Tạo Hợp đồng mới
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 flex-1 overflow-hidden flex flex-col">
+            <div class="overflow-x-auto flex-1">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
+                        <tr>
+                            <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Trường học (Client)</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Mảng (Tenant)</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Thời hạn hợp đồng</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Giới hạn truy cập</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Trạng thái</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200">
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="px-6 py-4">
+                                <div class="font-medium text-slate-800">THPT Lê Hồng Phong</div>
+                                <div class="text-xs text-slate-500 mt-0.5">MST: 0312345678</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="px-2.5 py-1 text-xs font-semibold bg-indigo-100 text-indigo-700 rounded-md border border-indigo-200">STEM</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-sm text-slate-700">01/01/2026 - 31/12/2026</div>
+                                <div class="text-xs text-emerald-600 font-medium mt-0.5">Còn 253 ngày</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-sm text-slate-700 font-medium">Max: 500 Sessions</div>
+                                <div class="text-xs text-slate-500 mt-0.5">Policy: KICK_OLDEST</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="px-2.5 py-1 text-xs font-medium bg-emerald-100 text-emerald-700 rounded-full border border-emerald-200">Active</span>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <button onclick="editSubscription(1)" class="text-blue-600 hover:text-blue-800 font-medium text-sm px-3 py-1 bg-blue-50 hover:bg-blue-100 rounded transition">Cấu hình</button>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="px-6 py-4">
+                                <div class="font-medium text-slate-800">THPT Chu Văn An</div>
+                                <div class="text-xs text-slate-500 mt-0.5">MST: 0198765432</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="px-2.5 py-1 text-xs font-semibold bg-orange-100 text-orange-700 rounded-md border border-orange-200">ENGLISH</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-sm text-slate-700">01/05/2025 - 30/04/2026</div>
+                                <div class="text-xs text-red-500 font-medium mt-0.5">Sắp hết hạn (Còn 7 ngày)</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-sm text-slate-700 font-medium">Max: 100 Sessions</div>
+                                <div class="text-xs text-slate-500 mt-0.5">Policy: BLOCK_NEW</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="px-2.5 py-1 text-xs font-medium bg-emerald-100 text-emerald-700 rounded-full border border-emerald-200">Active</span>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <button onclick="editSubscription(1)" class="text-blue-600 hover:text-blue-800 font-medium text-sm px-3 py-1 bg-blue-50 hover:bg-blue-100 rounded transition">Cấu hình</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-between items-center text-sm text-slate-500">
+                <div>Hiển thị 1 - 10 trong số 124 hợp đồng</div>
+                <div class="flex gap-2">
+                    <button class="px-3 py-1 border border-slate-300 rounded bg-white hover:bg-slate-50 disabled:opacity-50" disabled>Trước</button>
+                    <button class="px-3 py-1 border border-slate-300 rounded bg-white hover:bg-slate-50">Sau</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="subscriptionDrawer" class="fixed inset-0 hidden z-50">
+    <div class="fixed inset-0 drawer-shadow backdrop-blur-sm transition-opacity" onclick="closeDrawer()"></div>
+    
+    <div class="fixed right-0 top-0 bottom-0 w-full max-w-lg bg-white shadow-2xl flex flex-col transition-transform duration-300 translate-x-full" id="drawerContent">
+        
+        <div class="p-6 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+            <div>
+                <h2 class="text-xl font-bold text-slate-800">Thiết lập Hợp đồng mới</h2>
+                <p class="text-xs text-slate-500 mt-1">Cấp phép truy cập mảng giảng dạy cho Trường</p>
+            </div>
+            <button onclick="closeDrawer()" class="text-slate-400 hover:text-slate-700 text-2xl transition">&times;</button>
+        </div>
+        
+        <div class="p-6 flex-1 overflow-y-auto space-y-8">
+            
+            <div>
+                <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs">1</span>
+                    Đối tượng áp dụng
+                </h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">Chọn Trường học (Client) <span class="text-red-500">*</span></label>
+                        <select class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                            <option value="">-- Tìm kiếm & Chọn trường học --</option>
+                            <option value="1">THPT Lê Hồng Phong</option>
+                            <option value="2">THPT Chuyên Hà Nội - Amsterdam</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">Gắn vào Mảng giảng dạy (Tenant) <span class="text-red-500">*</span></label>
+                        <p class="text-xs text-slate-500 mb-2">Chọn một hoặc nhiều mảng — mỗi mảng sẽ tạo một hàng hợp đồng riêng.</p>
+                        <div class="border border-slate-300 rounded-lg divide-y divide-slate-100">
+                            <label class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 cursor-pointer">
+                                <input type="checkbox" name="tenants" value="STEM" class="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
+                                <div>
+                                    <span class="text-sm font-medium text-slate-800">STEM</span>
+                                    <span class="ml-2 text-xs text-slate-500">Khoa học &amp; Kỹ thuật</span>
+                                </div>
+                            </label>
+                            <label class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 cursor-pointer">
+                                <input type="checkbox" name="tenants" value="ENGLISH" class="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
+                                <div>
+                                    <span class="text-sm font-medium text-slate-800">ENGLISH</span>
+                                    <span class="ml-2 text-xs text-slate-500">Trung tâm Ngoại ngữ</span>
+                                </div>
+                            </label>
+                            <label class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 cursor-pointer">
+                                <input type="checkbox" name="tenants" value="KNS" class="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
+                                <div>
+                                    <span class="text-sm font-medium text-slate-800">KNS</span>
+                                    <span class="ml-2 text-xs text-slate-500">Kỹ năng sống</span>
+                                </div>
+                            </label>
+                        </div>
+                        <p class="text-xs text-indigo-600 mt-2">ℹ Mỗi mảng được chọn sẽ tạo một bản ghi <code>school_tenant_mapping</code> riêng biệt với cùng cấu hình hợp đồng.</p>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="border-slate-200">
+
+            <div>
+                <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs">2</span>
+                    Thời hạn Hợp đồng
+                </h3>
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">Ngày bắt đầu <span class="text-red-500">*</span></label>
+                        <input type="date" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">Ngày kết thúc <span class="text-red-500">*</span></label>
+                        <input type="date" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                </div>
+                <label class="flex items-center gap-2 cursor-pointer mt-2 bg-slate-50 p-3 rounded-lg border border-slate-200 hover:bg-slate-100 transition">
+                    <input type="checkbox" checked class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                    <div>
+                        <span class="text-sm font-medium text-slate-800 block">Kích hoạt Strict Expiry</span>
+                        <span class="text-xs text-slate-500 block mt-0.5">Hệ thống sẽ tự động chặn toàn bộ truy cập khi quá ngày kết thúc.</span>
+                    </div>
+                </label>
+            </div>
+
+            <hr class="border-slate-200">
+
+            <div>
+                <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs">3</span>
+                    Giới hạn Truy cập (Sessions)
+                </h3>
+                
+                <div class="mb-5">
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">Số lượng thiết bị truy cập đồng thời tối đa <span class="text-red-500">*</span></label>
+                    <div class="relative">
+                        <input type="number" placeholder="Ví dụ: 500" value="500" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none pl-10">
+                        <span class="absolute left-3 top-2.5 text-slate-400">👥</span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 mt-1.5">Tổng số lượng Giáo viên/Học sinh của trường này được phép online cùng lúc trong mảng này.</p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2.5">Chính sách khi vượt quá giới hạn (Login Policy) <span class="text-red-500">*</span></label>
+                    
+                    <div class="space-y-3">
+                        <label class="cursor-pointer block relative">
+                            <input type="radio" name="login_policy" value="BLOCK_NEW" class="radio-card-input peer sr-only" checked>
+                            <div class="radio-card-body p-4 rounded-xl border border-slate-200 hover:border-blue-300 transition flex gap-4 bg-white">
+                                <div class="mt-0.5">
+                                    <div class="radio-indicator w-5 h-5 rounded-full border-2 border-slate-300 bg-white transition-all"></div>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-slate-800">BLOCK_NEW (Chặn đăng nhập mới)</h4>
+                                    <p class="text-xs text-slate-500 mt-1">Khi đạt giới hạn (VD: 500 người đang học), người thứ 501 cố gắng đăng nhập sẽ bị hệ thống từ chối truy cập.</p>
+                                </div>
+                            </div>
+                        </label>
+
+                        <label class="cursor-pointer block relative">
+                            <input type="radio" name="login_policy" value="KICK_OLDEST" class="radio-card-input peer sr-only">
+                            <div class="radio-card-body p-4 rounded-xl border border-slate-200 hover:border-blue-300 transition flex gap-4 bg-white">
+                                <div class="mt-0.5">
+                                    <div class="radio-indicator w-5 h-5 rounded-full border-2 border-slate-300 bg-white transition-all"></div>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-slate-800">KICK_OLDEST (Đăng xuất phiên cũ)</h4>
+                                    <p class="text-xs text-slate-500 mt-1">Hệ thống luôn ưu tiên người mới. Khi đạt giới hạn, người thứ 501 đăng nhập sẽ ép tài khoản đã online lâu nhất bị văng ra ngoài.</p>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        
+        <div class="p-6 border-t border-slate-200 bg-white flex gap-4">
+            <button onclick="closeDrawer()" class="flex-1 bg-white border border-slate-300 text-slate-700 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-50 transition">Hủy bỏ</button>
+            <button class="flex-1 bg-blue-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition shadow-lg shadow-blue-200">Hoàn tất Gắn quyền</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const drawerWrapper = document.getElementById('subscriptionDrawer');
+    const drawerContent = document.getElementById('drawerContent');
+
+    function openDrawer() {
+        drawerWrapper.classList.remove('hidden');
+        setTimeout(() => {
+            drawerContent.classList.remove('translate-x-full');
+            drawerContent.classList.add('translate-x-0');
+        }, 10);
+    }
+
+    function closeDrawer() {
+        drawerContent.classList.remove('translate-x-0');
+        drawerContent.classList.add('translate-x-full');
+        setTimeout(() => {
+            drawerWrapper.classList.add('hidden');
+        }, 300);
+    }
+    // Thêm đoạn code này vào thẻ <script> ở cuối trang HTML
+
+    function editSubscription(schoolId) {
+        // 1. Đổi Tiêu đề của Drawer
+        document.querySelector('#drawerContent h2').innerText = 'Cập nhật Hợp đồng';
+        document.querySelector('#drawerContent p').innerText = 'Chỉnh sửa giới hạn truy cập cho trường THPT Lê Hồng Phong';
+        
+        // 2. Mô phỏng Load dữ liệu cũ vào Form
+        // (Trong thực tế, bước này sẽ gọi API GET /api/subscriptions/:id)
+        
+        const selects = document.querySelectorAll('#drawerContent select');
+        const inputs = document.querySelectorAll('#drawerContent input[type="date"]');
+        const numberInput = document.querySelector('#drawerContent input[type="number"]');
+        const radioKick = document.querySelector('input[name="login_policy"][value="KICK_OLDEST"]');
+        
+        // Set Trường học (Thường Edit sẽ Disabled không cho sửa)
+        selects[0].value = "1"; 
+        
+        // Khi edit, check mảng đang áp dụng
+        document.querySelectorAll('input[name="tenants"]').forEach(cb => {
+            cb.disabled = true; // khi edit, không đổi tenant
+            if (cb.value === 'STEM') cb.checked = true;
+        });
+        document.querySelector('.text-indigo-600.mt-2').style.display = 'none';
+        
+        // Set Ngày tháng
+        inputs[0].value = "2026-01-01";
+        inputs[1].value = "2026-12-31";
+        
+        // Set Giới hạn và Policy
+        numberInput.value = "500";
+        radioKick.checked = true; // Chuyển sang chọn Kick_Oldest
+
+        // 3. Mở Drawer
+        openDrawer();
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,461 @@
+Project aig_lms_multi_tenant {
+  database_type: "PostgreSQL"
+  Note: '''
+  AIG LMS - Multi-tenant shared database design
+  Tenant = Program/Subdomain (STEM, English, KNS...)
+  School = Customer school
+  Partner = Local partner
+  '''
+}
+
+Enum common_status {
+  ACTIVE
+  INACTIVE
+  LOCKED
+  DISABLED
+  DELETED
+}
+
+Enum sales_channel {
+  DIRECT
+  PARTNER
+}
+
+Enum role_scope {
+  PLATFORM
+  TENANT
+  SCHOOL
+}
+
+Enum curriculum_node_type {
+  ROOT
+  GRADE
+  SUBJECT
+  CHAPTER
+  LESSON
+  FOLDER
+}
+
+Enum content_type {
+  VIDEO
+  PDF
+  SLIDE
+  WORD
+  URL
+  INTERACTIVE
+}
+
+Enum processing_status {
+  QUEUED
+  PROCESSING
+  READY
+  FAILED
+}
+
+Enum visibility_status {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+Enum drm_type {
+  NONE
+  HLS_AES128
+  SAMPLE_AES
+  WIDEVINE
+}
+
+Enum asset_variant_type {
+  ORIGINAL
+  HLS_MASTER
+  HLS_PLAYLIST
+  THUMBNAIL
+  WATERMARKED_PDF
+  PREVIEW
+}
+
+Enum session_status {
+  ACTIVE
+  REVOKED
+  EXPIRED
+  LOGGED_OUT
+}
+
+Enum ticket_status {
+  ISSUED
+  USED
+  EXPIRED
+  REVOKED
+}
+
+Enum event_type {
+  LOGIN
+  LOGOUT
+  VIEW_CONTENT
+  START_VIDEO
+  HEARTBEAT
+  DOWNLOAD
+}
+
+Table tenant {
+  id uuid [pk]
+  code varchar(50) [not null, unique]
+  name varchar(255) [not null]
+  subdomain varchar(255) [not null, unique]
+  status common_status [not null, default: 'ACTIVE']
+  settings jsonb [not null]
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+
+  Note: 'Tenant = chương trình / subdomain'
+}
+
+Table partner {
+  id uuid [pk]
+  code varchar(50) [not null, unique]
+  name varchar(255) [not null]
+  contact_name varchar(255)
+  email varchar(255)
+  phone varchar(50)
+  status common_status [not null, default: 'ACTIVE']
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+
+Table school {
+  id uuid [pk]
+  code varchar(50) [not null, unique]
+  name varchar(255) [not null]
+  province varchar(100)
+  district varchar(100)
+  address text
+  status common_status [not null, default: 'ACTIVE']
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+
+Table partner_tenant_quota {
+  id uuid [pk]
+  tenant_id uuid [not null]
+  partner_id uuid [not null]
+  max_schools int [not null, default: 100]
+  status common_status [not null, default: 'ACTIVE']
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+
+  indexes {
+    (tenant_id, partner_id) [unique]
+  }
+
+  Note: 'Quota số trường tối đa partner được triển khai trong 1 tenant'
+}
+
+Table school_subscription {
+  id uuid [pk]
+  tenant_id uuid [not null]
+  school_id uuid [not null]
+  partner_id uuid
+  sales_channel sales_channel [not null]
+  contract_start_date date [not null]
+  contract_end_date date [not null]
+  max_users int [not null, default: 0]
+  max_storage_bytes bigint [not null, default: 0]
+  max_concurrent_sessions int [not null, default: 1]
+  allow_download boolean [not null, default: true]
+  status common_status [not null, default: 'ACTIVE']
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+
+  indexes {
+    (tenant_id, school_id) [unique]
+    (partner_id, tenant_id)
+    (tenant_id, status)
+    (school_id, status)
+  }
+
+  Note: 'Trường tham gia tenant nào, theo direct sales hay partner'
+}
+
+Table tenant_security_policy {
+  id uuid [pk]
+  tenant_id uuid [not null, unique]
+  default_signed_url_ttl_seconds int [not null, default: 300]
+  watermark_video_enabled boolean [not null, default: true]
+  watermark_document_enabled boolean [not null, default: true]
+  block_right_click boolean [not null, default: true]
+  block_shortcuts boolean [not null, default: false]
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+
+Table user_account {
+  id uuid [pk]
+  school_id uuid [not null]
+  username varchar(150) [not null]
+  email varchar(255)
+  password_hash text [not null]
+  full_name varchar(255) [not null]
+  avatar_url text
+  status common_status [not null, default: 'ACTIVE']
+  is_deleted boolean [not null, default: false]
+  failed_login_count int [not null, default: 0]
+  locked_until timestamptz
+  last_login_at timestamptz
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+
+  indexes {
+    (school_id, username) [unique]
+    (school_id, email)
+    (school_id, status)
+  }
+
+  Note: 'User gắn với school; tenant access được quyết định qua school_subscription + role assignment'
+}
+
+Table role {
+  id uuid [pk]
+  code varchar(50) [not null, unique]
+  name varchar(100) [not null]
+  scope role_scope [not null, default: 'TENANT']
+  created_at timestamptz [not null]
+
+  Note: 'Seed: SUPER_ADMIN, PARTNER_ADMIN, SCHOOL_ADMIN, TEACHER'
+}
+
+Table permission {
+  id uuid [pk]
+  code varchar(100) [not null, unique]
+  name varchar(255) [not null]
+  module varchar(100) [not null]
+  action varchar(50) [not null]
+  created_at timestamptz [not null]
+}
+
+Table role_permission {
+  role_id uuid [not null]
+  permission_id uuid [not null]
+
+  indexes {
+    (role_id, permission_id) [pk]
+  }
+}
+
+Table user_role_assignment {
+  id uuid [pk]
+  user_id uuid [not null]
+  tenant_id uuid
+  school_id uuid
+  role_id uuid [not null]
+  status common_status [not null, default: 'ACTIVE']
+  created_at timestamptz [not null]
+
+  indexes {
+    (user_id, role_id, tenant_id, school_id) [unique]
+    (tenant_id, school_id, status)
+  }
+
+  Note: 'Cho phép 1 user có role theo tenant hoặc theo school'
+}
+
+Table curriculum_node {
+  id uuid [pk]
+  tenant_id uuid [not null]
+  parent_id uuid
+  node_type curriculum_node_type [not null]
+  code varchar(50)
+  title varchar(255) [not null]
+  description text
+  sort_order int [not null, default: 0]
+  status common_status [not null, default: 'ACTIVE']
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+
+  indexes {
+    (tenant_id, parent_id, sort_order)
+    (tenant_id, node_type, status)
+  }
+
+  Note: 'Cây học liệu linh hoạt: ROOT > GRADE > SUBJECT > CHAPTER > LESSON'
+}
+
+Table content_item {
+  id uuid [pk]
+  tenant_id uuid [not null]
+  curriculum_node_id uuid [not null]
+  content_type content_type [not null]
+  title varchar(255) [not null]
+  description text
+  allow_download boolean [not null, default: false]
+  watermark_enabled boolean [not null, default: false]
+  signed_url_ttl_seconds int
+  drm_type drm_type
+  processing_status processing_status [not null, default: 'READY']
+  visibility_status visibility_status [not null, default: 'PUBLISHED']
+  created_by uuid
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+
+  indexes {
+    (tenant_id, curriculum_node_id, visibility_status)
+    (tenant_id, content_type, processing_status)
+  }
+}
+
+Table content_asset_variant {
+  id uuid [pk]
+  content_item_id uuid [not null]
+  variant_type asset_variant_type [not null]
+  storage_provider varchar(30) [not null, default: 'S3']
+  bucket_name varchar(255)
+  object_key text [not null]
+  mime_type varchar(255)
+  file_size_bytes bigint
+  duration_seconds int
+  width int
+  height int
+  metadata jsonb [not null]
+  created_at timestamptz [not null]
+
+  indexes {
+    (content_item_id, variant_type)
+  }
+
+  Note: 'Lưu các bản HLS, thumbnail, original, watermark output...'
+}
+
+Table user_session {
+  id uuid [pk]
+  tenant_id uuid [not null]
+  school_id uuid [not null]
+  user_id uuid [not null]
+  refresh_token_hash text [not null]
+  device_fingerprint varchar(255)
+  user_agent text
+  ip_address varchar(64)
+  started_at timestamptz [not null]
+  last_seen_at timestamptz [not null]
+  ended_at timestamptz
+  status session_status [not null, default: 'ACTIVE']
+  metadata jsonb [not null]
+
+  indexes {
+    (tenant_id, user_id, status, last_seen_at)
+    (school_id, user_id, status)
+  }
+
+  Note: 'Phục vụ concurrent session policy'
+}
+
+Table download_ticket {
+  id uuid [pk]
+  tenant_id uuid [not null]
+  school_id uuid [not null]
+  user_id uuid [not null]
+  content_item_id uuid [not null]
+  token_hash text [not null]
+  expires_at timestamptz [not null]
+  used_at timestamptz
+  status ticket_status [not null, default: 'ISSUED']
+  watermark_payload jsonb
+  created_at timestamptz [not null]
+
+  indexes {
+    (tenant_id, token_hash, status, expires_at)
+    (user_id, content_item_id, created_at)
+  }
+
+  Note: 'Signed URL / secure download ticket'
+}
+
+Table audit_log {
+  id bigserial [pk]
+  occurred_at timestamptz [not null]
+  tenant_id uuid
+  school_id uuid
+  user_id uuid
+  action varchar(100) [not null]
+  entity_type varchar(100)
+  entity_id uuid
+  ip_address varchar(64)
+  user_agent text
+  metadata jsonb [not null]
+
+  indexes {
+    (tenant_id, occurred_at)
+    (school_id, occurred_at)
+    (user_id, occurred_at)
+  }
+
+  Note: 'Nên partition theo tháng khi lên production'
+}
+
+Table usage_event {
+  id bigserial [pk]
+  occurred_at timestamptz [not null]
+  tenant_id uuid [not null]
+  school_id uuid [not null]
+  user_id uuid
+  content_item_id uuid
+  session_id uuid
+  event_type event_type [not null]
+  bytes_sent bigint [not null, default: 0]
+  watch_seconds int [not null, default: 0]
+  metadata jsonb [not null]
+
+  indexes {
+    (tenant_id, occurred_at)
+    (school_id, occurred_at)
+    (content_item_id, occurred_at)
+    (session_id, occurred_at)
+  }
+
+  Note: 'Nên partition theo tháng khi lên production'
+}
+
+Ref: partner_tenant_quota.tenant_id > tenant.id
+Ref: partner_tenant_quota.partner_id > partner.id
+
+Ref: school_subscription.tenant_id > tenant.id
+Ref: school_subscription.school_id > school.id
+Ref: school_subscription.partner_id > partner.id
+
+Ref: tenant_security_policy.tenant_id > tenant.id
+
+Ref: user_account.school_id > school.id
+
+Ref: role_permission.role_id > role.id
+Ref: role_permission.permission_id > permission.id
+
+Ref: user_role_assignment.user_id > user_account.id
+Ref: user_role_assignment.tenant_id > tenant.id
+Ref: user_role_assignment.school_id > school.id
+Ref: user_role_assignment.role_id > role.id
+
+Ref: curriculum_node.tenant_id > tenant.id
+Ref: curriculum_node.parent_id > curriculum_node.id
+
+Ref: content_item.tenant_id > tenant.id
+Ref: content_item.curriculum_node_id > curriculum_node.id
+Ref: content_item.created_by > user_account.id
+
+Ref: content_asset_variant.content_item_id > content_item.id
+
+Ref: user_session.tenant_id > tenant.id
+Ref: user_session.school_id > school.id
+Ref: user_session.user_id > user_account.id
+
+Ref: download_ticket.tenant_id > tenant.id
+Ref: download_ticket.school_id > school.id
+Ref: download_ticket.user_id > user_account.id
+Ref: download_ticket.content_item_id > content_item.id
+
+Ref: audit_log.tenant_id > tenant.id
+Ref: audit_log.school_id > school.id
+Ref: audit_log.user_id > user_account.id
+
+Ref: usage_event.tenant_id > tenant.id
+Ref: usage_event.school_id > school.id
+Ref: usage_event.user_id > user_account.id
+Ref: usage_event.content_item_id > content_item.id
+Ref: usage_event.session_id > user_session.id

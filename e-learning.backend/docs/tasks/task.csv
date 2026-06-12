@@ -1,0 +1,179 @@
+"Phase","No","Portal","Module","Dependencies","Summary","Description","Acceptance Criteria","Endpoints"
+"PHASE 0 — Infrastructure","P0.1","N/A","Database","—","Database Schema & Seed Data","Khởi tạo toàn bộ schema và dữ liệu seed cho môi trường dev/test.","- V1__initial_schema.sql — tenants, users, schools, content, permissions, audit_logs
+- V2__seed_dev.sql — dữ liệu mẫu
+- Indexes cho: tenant_id, user_id, content_id, domain",""
+"PHASE 1 — Centralized Identity Portal","1.1","Centralized Auth","Identity","P0.1","Identifier-First Login Flow (Bước nhập định danh)","User nhập email/username → hệ thống tra cứu tenant → trả về branding config phù hợp trước bước nhập mật khẩu.","- API nhận identifier, trả về tenant branding + nextStep
+- 1 tenant → áp branding white-label
+- Super Admin / multi-tenant → branding mặc định
+- Identifier không tồn tại → lỗi generic","POST /identity/identify"
+"PHASE 1 — Centralized Identity Portal","1.2","Centralized Auth","Identity","1.1","Authentication (Xác thực mật khẩu + cấp token)","User nhập mật khẩu → xác thực, kiểm tra trạng thái tài khoản/trường, cấp JWT.","- Đăng nhập thành công trả về access_token + refresh_token
+- Kiểm tra tài khoản bị khóa / trường hết hợp đồng
+- Brute-force protection: khóa tạm thời sau N lần sai
+- Ghi audit log mỗi lần login","POST /identity/login
+POST /identity/refresh-token
+POST /identity/logout"
+"PHASE 1 — Centralized Identity Portal","1.3","Centralized Auth","Identity","1.2","Workspace Selector (Chọn tenant khi đa tenant)","User thuộc nhiều tenant → sau login hiển thị màn hình chọn workspace trước khi vào dashboard.","- API trả về danh sách tenant còn hiệu lực
+- Chọn tenant → token được scope vào tenant đó
+- Có Tenant Switcher trong session
+- Tenant hết hạn không hiển thị","GET /identity/workspaces
+POST /identity/workspaces/{tenantId}/select"
+"PHASE 1 — Centralized Identity Portal","1.4","Centralized Auth","Identity","1.2","Concurrent Session Management (Giới hạn đăng nhập đồng thời)","Kiểm soát số session đồng thời theo cấu hình, xử lý vượt ngưỡng (Block hoặc Kick session cũ).","- Cấu hình max_concurrent_sessions theo user / loại tài khoản
+- Policy Block (từ chối login mới) hoặc Kick (đá session cũ nhất)
+- API xem/hủy session của bản thân
+- Admin xem/hủy session của bất kỳ user
+- Ghi log sự kiện session","GET /identity/sessions
+DELETE /identity/sessions/{sessionId}
+DELETE /identity/sessions
+GET /admin/users/{userId}/sessions
+DELETE /admin/users/{userId}/sessions"
+"PHASE 2 — LMS Admin Portal","2.1","Admin Portal","Tenancy","P0.1","Quản lý Tenant và Branding","As LMS Admin, quản lý danh sách tenant (STEM, English, KNS…) cùng domain, logo, avatar, branding.","- Tạo/sửa/ngưng tenant
+- Quản lý: code, name, domain, logo, avatar, mô tả, trạng thái
+- Không trùng domain hoặc tenant_code
+- Danh sách có search, filter, phân trang","GET /admin/tenants
+POST /admin/tenants
+GET /admin/tenants/{tenantId}
+PUT /admin/tenants/{tenantId}
+PATCH /admin/tenants/{tenantId}/status"
+"PHASE 2 — LMS Admin Portal","2.2","Tất cả Portal","Tenancy","2.1","Resolve Tenant theo Domain (Middleware)","Middleware nhận diện tenant từ Host header, trả về branding config cho client.","- Resolve đúng tenant từ Host header / query param
+- Domain không khớp → 404 hoặc redirect lỗi
+- Trả branding config theo tenant
+- Fallback về admin domain nếu không match","GET /tenants/resolve?domain={domain}"
+"PHASE 2 — LMS Admin Portal","2.3","Admin Portal","Schools","P0.1","Quản lý Trường học","As LMS Admin, quản lý danh sách trường học và hợp đồng để gán user đúng đơn vị.","- Tạo/sửa/ngưng trường học
+- Thông tin: tên, mã trường, địa chỉ, MST, POC, tỉnh/thành phố
+- Thiết lập thời hạn hợp đồng
+- Search, filter, xem chi tiết","GET /admin/schools
+POST /admin/schools
+GET /admin/schools/{schoolId}
+PUT /admin/schools/{schoolId}
+PATCH /admin/schools/{schoolId}/status"
+"PHASE 2 — LMS Admin Portal","2.4","Admin Portal","Schools","2.1, 2.3","Cấu hình License & Subscription cho Trường","Gắn trường học vào tenant và cấu hình hợp đồng (thời hạn, max sessions, login policy).","- Gắn trường vào một hoặc nhiều tenant
+- Cấu hình: ngày bắt đầu/kết thúc, max concurrent sessions, policy Block/Kick
+- Cảnh báo khi hợp đồng sắp hết hạn
+- Không cho login khi hợp đồng hết hạn","GET /admin/schools/{schoolId}/subscriptions
+POST /admin/schools/{schoolId}/subscriptions
+PUT /admin/schools/{schoolId}/subscriptions/{id}
+DELETE /admin/schools/{schoolId}/subscriptions/{id}"
+"PHASE 2 — LMS Admin Portal","2.5","Admin Portal","Users","P0.1","Quản lý Tài khoản Người dùng","As LMS Admin, tạo và quản lý tài khoản toàn hệ thống (gán tenant, loại tài khoản, trường học).","- Tạo/sửa/khóa user
+- Quản lý: username, password, họ tên, email, avatar, loại tài khoản, trạng thái
+- Phân loại: lms_admin, tenant_admin, school_user
+- Ghi audit log khi tạo/sửa/khóa","GET /admin/users
+POST /admin/users
+GET /admin/users/{userId}
+PUT /admin/users/{userId}
+PATCH /admin/users/{userId}/status
+POST /admin/users/{userId}/reset-password"
+"PHASE 2 — LMS Admin Portal","2.6","Admin Portal","Users","2.1, 2.5","Gán User vào Tenant (User-Tenant Mapping)","As LMS Admin, gán một user vào một hoặc nhiều tenant để cấp quyền đa mảng.","- Một user thuộc nhiều tenant
+- Gán/bỏ gán tenant cho user
+- Không gán trùng
+- Khi login chỉ truy cập tenant đã được gán","GET /admin/users/{userId}/tenants
+POST /admin/users/{userId}/tenants
+DELETE /admin/users/{userId}/tenants/{tenantId}"
+"PHASE 2 — LMS Admin Portal","2.7","Admin Portal","Users","2.3, 2.5","Gán User vào Trường học (User-School Mapping)","As LMS Admin, gắn tài khoản school_user vào đúng trường học.","- school_user bắt buộc gắn home_school_id
+- LMS Admin / Tenant Admin xem user theo trường
+- Filter user theo trường
+- Loại khác không bắt buộc gắn trường","GET /admin/schools/{schoolId}/users
+POST /admin/users/{userId}/school
+DELETE /admin/users/{userId}/school"
+"PHASE 2 — LMS Admin Portal","2.8","Tất cả Portal","Authorization","2.1, 2.5","Phân quyền Hệ thống theo Account Type & Tenant","Phân quyền theo account_type và tenant membership, áp dụng nhất quán trên toàn API.","- lms_admin → toàn quyền
+- tenant_admin → chỉ trong tenant được gán
+- school_user → chỉ nội dung được cấp quyền
+- Middleware Authorization nhất quán trên tất cả endpoint","GET /admin/roles
+GET /admin/users/{userId}/permissions"
+"PHASE 2 — LMS Admin Portal","2.9","Admin Portal","SharedKernel","P0.1","Quản lý Danh mục Dùng chung (Master Data)","As LMS Admin, quản lý master data dùng chung cho toàn hệ thống.","- CRUD: loại tài liệu, trạng thái nội dung, loại tài khoản, nhãn hiển thị
+- Validate trùng, không xóa nếu đang được dùng
+- Dùng được ở nhiều module","GET /admin/catalog/{type}
+POST /admin/catalog/{type}
+PUT /admin/catalog/{type}/{id}
+DELETE /admin/catalog/{type}/{id}"
+"PHASE 2 — LMS Admin Portal","2.10","Admin Portal","AuditLogs","2.5","Hệ thống Audit Log","As LMS Admin, truy vết toàn bộ hành vi người dùng (login, xem, tải, chỉnh sửa dữ liệu).","- Ghi log: login, logout, view content, download, CRUD data
+- Fields: user_id, tenant_id, school_id, ip_address, action, result, created_at
+- Filter theo thời gian, user, tenant, trường, action
+- Export CSV","GET /admin/audit-logs
+GET /admin/audit-logs/export"
+"PHASE 2 — LMS Admin Portal","2.11","Admin Portal","Reports","2.1, 2.3, 1.4","Dashboard Tổng quan Admin","As LMS Admin, xem thống kê tổng quan hệ thống và số session active realtime.","- Tổng số tenant active
+- Tổng số trường đang hoạt động
+- Tổng session active toàn hệ thống
+- Cảnh báo hợp đồng sắp hết hạn
+- Không đếm trùng session","GET /admin/dashboard/stats
+GET /admin/dashboard/active-sessions"
+"PHASE 3 — Tenant Admin Portal","3.1","Tenant Portal","ContentManagement","P0.1, 2.1","Quản lý Cây Học liệu (Curriculum Tree)","As Tenant Admin, quản lý cây master data Chương trình → Khối → Lớp → Môn học → Bài học.","- Tạo/sửa/xóa node
+- Sắp xếp thứ tự (sort_order)
+- Không xóa node đang có nội dung / node con
+- Validate trùng tên trong cùng cấp
+- API trả cây đầy đủ cho CMS và Client","GET /tenants/{tenantId}/curriculum
+GET /tenants/{tenantId}/curriculum/{nodeId}/children
+POST /tenants/{tenantId}/curriculum
+PUT /tenants/{tenantId}/curriculum/{nodeId}
+DELETE /tenants/{tenantId}/curriculum/{nodeId}
+PATCH /tenants/{tenantId}/curriculum/reorder"
+"PHASE 3 — Tenant Admin Portal","3.2","Tenant Portal","ContentManagement","3.1","Quản lý Nội dung Đa phương tiện (Content CMS)","As Tenant Admin, upload và quản lý Video, PDF, Slide, Word, URL theo cây học liệu.","- Upload: Video, PDF, Slide, Word, URL
+- Gắn nội dung vào đúng node
+- Metadata: tiêu đề, mô tả, loại, trạng thái, schedule publish
+- Chỉ thao tác nội dung của tenant mình","GET /tenants/{tenantId}/contents
+POST /tenants/{tenantId}/contents
+GET /tenants/{tenantId}/contents/{contentId}
+PUT /tenants/{tenantId}/contents/{contentId}
+DELETE /tenants/{tenantId}/contents/{contentId}
+PATCH /tenants/{tenantId}/contents/{contentId}/status
+POST /tenants/{tenantId}/contents/{contentId}/upload"
+"PHASE 3 — Tenant Admin Portal","3.3","Tenant Portal / Background Worker","MediaProcessing","3.2","Pipeline Xử lý Video HLS","Video upload tự động đưa vào pipeline xử lý HLS, không public file nguồn.","- Tự động queue sau khi upload
+- Trạng thái: queued → processing → ready / failed
+- Viewer chỉ phát output HLS hợp lệ
+- Ghi log, notify khi failed","GET /tenants/{tenantId}/contents/{contentId}/processing-status
+POST /tenants/{tenantId}/contents/{contentId}/reprocess"
+"PHASE 3 — Tenant Admin Portal","3.4","Tenant Portal","ContentManagement","3.2","Cấu hình Security & Interaction Policy cho Nội dung [COMPLETED]","As Tenant Admin, cấu hình watermark, download, signed URL, comment trên từng content. Task đã hoàn tất.","- Bật/tắt watermark
+- Bật/tắt download
+- Cấu hình signed URL TTL
+- Bật/tắt comment","GET /tenants/{tenantId}/contents/{contentId}/policy
+PUT /tenants/{tenantId}/contents/{contentId}/policy"
+"PHASE 3 — Tenant Admin Portal","3.5","Tenant Portal","Authorization","3.1, 2.5","Phân quyền Nội dung (Permission Distribution) [COMPLETED]","As Tenant Admin, cấp quyền View/Download/Comment theo node cây học liệu cho user/trường. Task đã hoàn tất.","- Cấp quyền theo node (cha kế thừa con)
+- Actions: View, Download, Comment
+- Gán cho user cụ thể hoặc toàn trường
+- Thu hồi quyền đã cấp
+- Lưu và truy vết được","GET /tenants/{tenantId}/permissions
+POST /tenants/{tenantId}/permissions
+DELETE /tenants/{tenantId}/permissions/{permissionId}
+GET /tenants/{tenantId}/curriculum/{nodeId}/permissions
+GET /tenants/{tenantId}/users/{userId}/permissions"
+"PHASE 3 — Tenant Admin Portal","3.6","Tenant Portal","Reports","3.2, 3.5","Dashboard Tenant Admin","As Tenant Admin, xem thống kê dung lượng, trường sử dụng, top bài giảng.","- Dung lượng học liệu đã upload
+- Số trường đang dùng tenant
+- Top content được xem nhiều","GET /tenants/{tenantId}/dashboard/stats
+GET /tenants/{tenantId}/dashboard/top-contents"
+"PHASE 4 — Client Portal","4.1","Client Portal","Tenancy","2.1, 2.2","White-label Branding theo Tenant","Giao diện Client hiển thị đúng logo/màu sắc theo tenant domain.","- Hiển thị đúng branding theo domain
+- Không hiển thị sai branding giữa các tenant
+- Fallback khi chưa cấu hình đủ
+- Thay đổi branding có hiệu lực ngay","GET /tenants/resolve?domain={domain}  (dùng lại từ 2.2)"
+"PHASE 4 — Client Portal","4.2","Client Portal","ContentDelivery","3.1, 3.5","Duyệt Cây Học liệu (Curriculum Explorer) [COMPLETED]","Teacher/Student duyệt cây học liệu đã được cấp quyền, tìm bài giảng nhanh. Task đã hoàn tất.","- Hiển thị đúng cây theo quyền (không thấy node ngoài quyền)
+- Mở được chi tiết bài học
+- Hiệu năng ổn với dữ liệu lớn","GET /client/curriculum
+GET /client/curriculum/{nodeId}/contents"
+"PHASE 4 — Client Portal","4.3","Client Portal","Viewer","3.3, 3.4, 3.5","E-Learning Viewer — Video HLS Player","Teacher phát video HLS trong viewer bảo mật, không lộ source URL.","- Phát được HLS qua signed URL
+- Loading/error state rõ ràng
+- Hỗ trợ full-screen
+- Không lộ direct source URL","GET /client/contents/{contentId}/stream-url"
+"PHASE 4 — Client Portal","4.4","Client Portal","Viewer","3.4, 3.5","E-Learning Viewer — Document Viewer PDF/Slide [COMPLETED]","Teacher xem PDF/Slide trực tiếp trên web, chặn chuột phải, không lộ link file. Task đã hoàn tất.","- Mở PDF/Slide trong viewer
+- Chuyển trang, zoom, full-screen
+- Chặn chuột phải
+- Không lộ link file gốc","GET /client/contents/{contentId}/view-url"
+"PHASE 4 — Client Portal","4.5","Client Portal","Viewer","3.4","Dynamic Watermark","Watermark động overlay trên video/document khi xem (tên công ty, tên tài khoản, thời gian).","- Watermark overlay realtime
+- Nội dung: tên công ty / tên tài khoản / thời gian
+- Không thể tắt bằng thao tác thông thường
+- Chỉ áp dụng khi bật policy watermark","GET /client/contents/{contentId}/watermark-config"
+"PHASE 4 — Client Portal","4.6","Client Portal","Downloads","3.4, 3.5","Secure Download","Chỉ tải được tài liệu khi có quyền Download, link tải là signed URL có TTL ngắn.","- Chỉ hiện nút tải khi có quyền Download
+- Signed URL TTL ngắn, không dùng lại
+- Nội dung không cho download thì không tải được
+- Ghi audit log khi tải","GET /client/contents/{contentId}/download-url"
+"PHASE 4 — Client Portal","4.7","Client Portal","Viewer","4.3, 4.4","Classroom Full-Screen Mode","Teacher dùng chế độ full-screen tối ưu khi trình chiếu trong lớp học.","- Nút bật/tắt full-screen rõ ràng
+- Giao diện full-screen tối giản (ẩn sidebar/header)
+- Không che vùng nội dung chính
+- Ổn định trên Chrome, Edge, Safari","(Xử lý hoàn toàn ở frontend, không cần backend endpoint)"
+"PHASE 4 — Client Portal","4.8","Client Portal","Viewer","4.2","My Favorites (Kho học liệu cá nhân)","Teacher/Student lưu bài giảng yêu thích để truy cập lại nhanh.","- Thêm/xóa vào danh sách yêu thích
+- Màn hình dạng Grid/List
+- Chỉ hiển thị nội dung còn quyền truy cập
+- Dữ liệu lưu theo từng user","GET /client/favorites
+POST /client/favorites/{contentId}
+DELETE /client/favorites/{contentId}"
+"PHASE 4 — Client Portal","4.9","Client Portal","ContentDelivery","3.5, 4.2","My Dashboard (Trang chủ học tập)","Trang chủ hiển thị Chương trình/Khối được cấp quyền và nội dung đã xem gần nhất.","- Hiển thị Chương trình/Khối được cấp quyền
+- Khu vực Tiếp tục học (nội dung gần nhất)
+- Hiển thị đúng branding tenant hiện tại","GET /client/dashboard
+GET /client/recent-contents"

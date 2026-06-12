@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curriculum Builder - STEM Education</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .modal-shadow { background: rgba(0, 0, 0, 0.5); }
+        
+        /* Tree View Styles */
+        .tree-line {
+            position: absolute;
+            left: -16px;
+            top: 24px;
+            bottom: 0;
+            width: 2px;
+            background-color: #e2e8f0; /* slate-200 */
+        }
+        .tree-children {
+            position: relative;
+            padding-left: 32px;
+            margin-top: 8px;
+        }
+        
+        .drag-handle { cursor: grab; opacity: 0; transition: opacity 0.2s; }
+        .node-row:hover .drag-handle { opacity: 1; }
+        
+        .toggle-icon { transition: transform 0.2s; }
+        .collapsed .toggle-icon { transform: rotate(-90deg); }
+        .collapsed .tree-children { display: none; }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="flex min-h-screen">
+    <div class="w-64 bg-emerald-900 text-white p-6 hidden md:flex flex-col flex-shrink-0">
+        <div class="flex items-center gap-3 mb-8">
+            <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-emerald-900 font-bold">S</div>
+            <div class="text-xl font-bold tracking-wide">STEM Edu</div>
+        </div>
+        <nav class="space-y-3 flex-1">
+            <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-emerald-800 text-emerald-100">Dashboard</a>
+            <a href="#" class="block py-2.5 px-4 rounded bg-emerald-600 text-white font-medium shadow-md shadow-emerald-900/50">Cây Học Liệu</a>
+            <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-emerald-800 text-emerald-100">Quản lý Nội dung</a>
+            <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-emerald-800 text-emerald-100">Phân quyền Nội dung</a>
+            <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-emerald-800 text-emerald-100">Người dùng (Roles)</a>
+        </nav>
+    </div>
+
+    <div class="flex-1 p-8 overflow-x-hidden flex flex-col h-screen">
+        
+        <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800">Cấu trúc Học liệu (Curriculum)</h1>
+                <p class="text-sm text-slate-500 mt-1">Xây dựng và sắp xếp khung chương trình giảng dạy</p>
+            </div>
+            <div class="flex gap-3">
+                <button class="bg-white border border-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 transition shadow-sm">
+                    Mở rộng tất cả
+                </button>
+                <button onclick="openNodeModal('Thêm Chương trình mới', 'PROGRAM')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm flex items-center gap-2">
+                    <span>+ Thêm Chương trình (Root)</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 flex-1 overflow-y-auto p-6">
+            
+            <div class="node-group" id="node-1">
+                <div class="node-row flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-200 transition group">
+                    <div class="flex items-center gap-3">
+                        <span class="drag-handle text-slate-400">⋮⋮</span>
+                        <button onclick="toggleNode('node-1')" class="w-6 h-6 flex items-center justify-center text-slate-500 hover:bg-slate-200 rounded">
+                            <span class="toggle-icon">▼</span>
+                        </button>
+                        <span class="px-2 py-0.5 text-[10px] font-bold bg-purple-100 text-purple-700 rounded border border-purple-200">PROGRAM</span>
+                        <span class="font-bold text-slate-800">Chương trình STEM Tiêu chuẩn 2026</span>
+                    </div>
+                    <div class="opacity-0 group-hover:opacity-100 transition flex gap-2">
+                        <button onclick="openNodeModal('Thêm Khối mới', 'GRADE')" class="text-xs font-medium text-emerald-600 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1.5 rounded border border-emerald-200">+ Thêm Khối</button>
+                        <button onclick="openNodeModal('Sửa Chương trình', 'PROGRAM', 'Chương trình STEM Tiêu chuẩn 2026')" class="text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 px-2.5 py-1.5 rounded border border-blue-200">Sửa</button>
+                        <button onclick="openDeleteModal()" class="text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 px-2.5 py-1.5 rounded border border-red-200">Xóa</button>
+                    </div>
+                </div>
+
+                <div class="tree-children">
+                    <div class="tree-line"></div>
+                    
+                    <div class="node-group" id="node-1-1">
+                        <div class="node-row flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-200 transition group">
+                            <div class="flex items-center gap-3">
+                                <span class="drag-handle text-slate-400">⋮⋮</span>
+                                <button onclick="toggleNode('node-1-1')" class="w-6 h-6 flex items-center justify-center text-slate-500 hover:bg-slate-200 rounded">
+                                    <span class="toggle-icon">▼</span>
+                                </button>
+                                <span class="px-2 py-0.5 text-[10px] font-bold bg-blue-100 text-blue-700 rounded border border-blue-200">GRADE</span>
+                                <span class="font-semibold text-slate-700">Khối 10</span>
+                            </div>
+                            <div class="opacity-0 group-hover:opacity-100 transition flex gap-2">
+                                <button onclick="openNodeModal('Thêm Môn học mới', 'SUBJECT')" class="text-xs font-medium text-emerald-600 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1.5 rounded border border-emerald-200">+ Thêm Môn</button>
+                                <button class="text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 px-2.5 py-1.5 rounded border border-blue-200">Sửa</button>
+                                <button class="text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 px-2.5 py-1.5 rounded border border-red-200">Xóa</button>
+                            </div>
+                        </div>
+
+                        <div class="tree-children">
+                            <div class="tree-line"></div>
+                            
+                            <div class="node-group" id="node-1-1-1">
+                                <div class="node-row flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-200 transition group">
+                                    <div class="flex items-center gap-3">
+                                        <span class="drag-handle text-slate-400">⋮⋮</span>
+                                        <button onclick="toggleNode('node-1-1-1')" class="w-6 h-6 flex items-center justify-center text-slate-500 hover:bg-slate-200 rounded">
+                                            <span class="toggle-icon">▼</span>
+                                        </button>
+                                        <span class="px-2 py-0.5 text-[10px] font-bold bg-amber-100 text-amber-700 rounded border border-amber-200">SUBJECT</span>
+                                        <span class="font-medium text-slate-700">Lập trình Cơ bản (Python)</span>
+                                    </div>
+                                    <div class="opacity-0 group-hover:opacity-100 transition flex gap-2">
+                                        <button onclick="openNodeModal('Thêm Bài học mới', 'LESSON')" class="text-xs font-medium text-emerald-600 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1.5 rounded border border-emerald-200">+ Thêm Bài học</button>
+                                        <button class="text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 px-2.5 py-1.5 rounded border border-blue-200">Sửa</button>
+                                        <button class="text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 px-2.5 py-1.5 rounded border border-red-200">Xóa</button>
+                                    </div>
+                                </div>
+
+                                <div class="tree-children">
+                                    <div class="tree-line"></div>
+                                    
+                                    <div class="node-row flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-200 transition group">
+                                        <div class="flex items-center gap-3">
+                                            <span class="drag-handle text-slate-400">⋮⋮</span>
+                                            <div class="w-6 h-6 flex items-center justify-center text-slate-300">•</div>
+                                            <span class="px-2 py-0.5 text-[10px] font-bold bg-slate-100 text-slate-600 rounded border border-slate-200">LESSON</span>
+                                            <span class="text-slate-700">Bài 1: Giới thiệu về Thuật toán</span>
+                                            <span class="text-[10px] text-slate-400 ml-2">(Có 2 file học liệu)</span>
+                                        </div>
+                                        <div class="opacity-0 group-hover:opacity-100 transition flex gap-2">
+                                            <button class="text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 px-2.5 py-1.5 rounded border border-blue-200">Sửa</button>
+                                            <button class="text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 px-2.5 py-1.5 rounded border border-red-200">Xóa</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="node-row flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-200 transition group">
+                                        <div class="flex items-center gap-3">
+                                            <span class="drag-handle text-slate-400">⋮⋮</span>
+                                            <div class="w-6 h-6 flex items-center justify-center text-slate-300">•</div>
+                                            <span class="px-2 py-0.5 text-[10px] font-bold bg-slate-100 text-slate-600 rounded border border-slate-200">LESSON</span>
+                                            <span class="text-slate-700">Bài 2: Biến và Kiểu dữ liệu</span>
+                                        </div>
+                                        <div class="opacity-0 group-hover:opacity-100 transition flex gap-2">
+                                            <button class="text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 px-2.5 py-1.5 rounded border border-blue-200">Sửa</button>
+                                            <button class="text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 px-2.5 py-1.5 rounded border border-red-200">Xóa</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="node-row flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-200 transition group">
+                                <div class="flex items-center gap-3">
+                                    <span class="drag-handle text-slate-400">⋮⋮</span>
+                                    <button class="w-6 h-6 flex items-center justify-center text-slate-500 hover:bg-slate-200 rounded"><span class="toggle-icon">▶</span></button>
+                                    <span class="px-2 py-0.5 text-[10px] font-bold bg-amber-100 text-amber-700 rounded border border-amber-200">SUBJECT</span>
+                                    <span class="font-medium text-slate-700">Thiết kế phần cứng (IoT)</span>
+                                </div>
+                                <div class="opacity-0 group-hover:opacity-100 transition flex gap-2">
+                                    <button class="text-xs font-medium text-emerald-600 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1.5 rounded border border-emerald-200">+ Thêm Bài học</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="node-row flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-200 transition group">
+                        <div class="flex items-center gap-3">
+                            <span class="drag-handle text-slate-400">⋮⋮</span>
+                            <button class="w-6 h-6 flex items-center justify-center text-slate-500 hover:bg-slate-200 rounded"><span class="toggle-icon">▶</span></button>
+                            <span class="px-2 py-0.5 text-[10px] font-bold bg-blue-100 text-blue-700 rounded border border-blue-200">GRADE</span>
+                            <span class="font-semibold text-slate-700">Khối 11</span>
+                        </div>
+                        <div class="opacity-0 group-hover:opacity-100 transition flex gap-2">
+                            <button class="text-xs font-medium text-emerald-600 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1.5 rounded border border-emerald-200">+ Thêm Môn</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            </div>
+    </div>
+</div>
+
+<div id="nodeModal" class="fixed inset-0 hidden z-50 flex items-center justify-center">
+    <div class="fixed inset-0 modal-shadow backdrop-blur-sm transition-opacity" onclick="closeNodeModal()"></div>
+    
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md z-10 scale-100 transition-transform">
+        <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-slate-50 rounded-t-xl">
+            <h2 class="text-lg font-bold text-slate-800" id="modalTitle">Thêm Node</h2>
+            <button onclick="closeNodeModal()" class="text-slate-400 hover:text-slate-700 text-2xl leading-none">&times;</button>
+        </div>
+        
+        <div class="p-6 space-y-4">
+            <div id="duplicateAlert" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-start gap-2">
+                <span>⚠️</span>
+                <div>
+                    <strong class="block">Lỗi: Trùng lặp dữ liệu</strong>
+                    <span class="text-red-600">Tên này đã tồn tại trong cùng thư mục cha. Vui lòng chọn tên khác.</span>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1.5">Cấp độ (Node Type)</label>
+                <input type="text" id="nodeTypeDisplay" readonly class="w-full border border-slate-200 bg-slate-100 rounded-lg p-2.5 text-sm text-slate-500 cursor-not-allowed font-mono">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1.5">Mã Code (Tùy chọn)</label>
+                <input type="text" placeholder="VD: B1" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1.5">Tên thư mục/bài học <span class="text-red-500">*</span></label>
+                <input type="text" id="nodeTitleInput" placeholder="Nhập tên..." class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                <p class="text-[11px] text-slate-500 mt-1">Thử nhập "Bài 1" để xem cảnh báo trùng tên.</p>
+            </div>
+        </div>
+        
+        <div class="p-5 border-t border-slate-200 bg-slate-50 rounded-b-xl flex gap-3 justify-end">
+            <button onclick="closeNodeModal()" class="px-5 py-2.5 border border-slate-300 bg-white text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition">Hủy bỏ</button>
+            <button onclick="saveNode()" class="px-5 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition shadow-sm">Lưu lại</button>
+        </div>
+    </div>
+</div>
+
+<div id="deleteModal" class="fixed inset-0 hidden z-50 flex items-center justify-center">
+    <div class="fixed inset-0 modal-shadow backdrop-blur-sm" onclick="closeDeleteModal()"></div>
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm z-10 p-6 text-center">
+        <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
+            🗑️
+        </div>
+        <h2 class="text-lg font-bold text-slate-800 mb-2">Xác nhận Xóa</h2>
+        <p class="text-sm text-slate-600 mb-6">Bạn có chắc chắn muốn xóa thư mục này? Toàn bộ thư mục con và tài liệu bên trong sẽ bị xóa vĩnh viễn.</p>
+        <div class="flex gap-3">
+            <button onclick="closeDeleteModal()" class="flex-1 px-4 py-2.5 border border-slate-300 bg-white text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition">Hủy bỏ</button>
+            <button class="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition">Xóa vĩnh viễn</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Logic Mở/Đóng nhánh cây (Expand/Collapse)
+    function toggleNode(nodeId) {
+        const node = document.getElementById(nodeId);
+        if (node) {
+            node.classList.toggle('collapsed');
+        }
+    }
+
+    // Modal Logic
+    const nodeModal = document.getElementById('nodeModal');
+    const deleteModal = document.getElementById('deleteModal');
+    const duplicateAlert = document.getElementById('duplicateAlert');
+    const titleInput = document.getElementById('nodeTitleInput');
+
+    function openNodeModal(title, type, existingValue = '') {
+        document.getElementById('modalTitle').innerText = title;
+        document.getElementById('nodeTypeDisplay').value = type;
+        titleInput.value = existingValue;
+        
+        duplicateAlert.classList.add('hidden'); // Reset alert
+        titleInput.classList.remove('border-red-500');
+
+        nodeModal.classList.remove('hidden');
+    }
+
+    function closeNodeModal() {
+        nodeModal.classList.add('hidden');
+    }
+
+    // Mô phỏng Validation chống trùng tên
+    function saveNode() {
+        const value = titleInput.value.trim().toLowerCase();
+        
+        // Giả sử chữ "bài 1" đã có sẵn trong database của Node cha này
+        if (value === 'bài 1' || value === 'bai 1') {
+            // Hiện lỗi
+            duplicateAlert.classList.remove('hidden');
+            titleInput.classList.add('border-red-500');
+            titleInput.focus();
+        } else {
+            // Success
+            alert('Lưu thành công!');
+            closeNodeModal();
+        }
+    }
+
+    // Modal Xóa
+    function openDeleteModal() { deleteModal.classList.remove('hidden'); }
+    function closeDeleteModal() { deleteModal.classList.add('hidden'); }
+</script>
+
+</body>
+</html>

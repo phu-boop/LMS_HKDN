@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Audit Logs - LMS Admin Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .drawer-shadow { background: rgba(0, 0, 0, 0.4); }
+        
+        /* Tùy chỉnh thanh cuộn */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Style cho khối hiển thị JSON */
+        .json-viewer {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #0f172a; /* slate-900 */
+            color: #38bdf8; /* sky-400 */
+            border-radius: 0.5rem;
+            padding: 1rem;
+            overflow-x: auto;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+        .json-key { color: #f87171; } /* red-400 */
+        .json-string { color: #a3e635; } /* lime-400 */
+        .json-number { color: #fbbf24; } /* amber-400 */
+    </style>
+</head>
+<body>
+
+<div class="flex min-h-screen">
+    <div class="w-64 bg-slate-900 text-white p-6 hidden md:block flex-shrink-0">
+        <div class="text-2xl font-bold mb-8 text-blue-400">AIG LMS</div>
+        <nav class="space-y-4">
+            <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-slate-800 text-slate-400">Dashboard</a>
+            <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-slate-800 text-slate-400">Quản lý Tenant</a>
+            <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-slate-800 text-slate-400">Trường học</a>
+            <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-slate-800 text-slate-400">Hợp đồng</a>
+            <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-slate-800 text-slate-400">Quản lý User</a>
+            <a href="#" class="block py-2.5 px-4 rounded bg-blue-600 text-white font-medium shadow-md shadow-blue-900/50">Audit Logs</a>
+        </nav>
+    </div>
+
+    <div class="flex-1 p-8 overflow-x-hidden flex flex-col h-screen">
+        
+        <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800">Nhật ký Hệ thống (Audit Logs)</h1>
+                <p class="text-sm text-slate-500 mt-1">Truy vết toàn bộ thao tác, sự kiện bảo mật và thay đổi dữ liệu</p>
+            </div>
+            <button class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-4 py-2.5 rounded-lg text-sm font-medium transition flex items-center gap-2 shadow-sm">
+                <span>⬇️</span> Xuất dữ liệu (CSV)
+            </button>
+        </div>
+
+        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Khoảng thời gian</label>
+                    <div class="flex items-center gap-2">
+                        <input type="date" class="w-full border border-slate-300 rounded p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" value="2026-04-23">
+                        <span class="text-slate-400">-</span>
+                        <input type="date" class="w-full border border-slate-300 rounded p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" value="2026-04-23">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Ngữ cảnh (Tenant / School)</label>
+                    <select class="w-full border border-slate-300 rounded p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none mb-2 bg-white">
+                        <option value="">Tất cả mảng (Tenants)</option>
+                        <option value="STEM">STEM Education</option>
+                        <option value="ENG">English Plus</option>
+                    </select>
+                    <select class="w-full border border-slate-300 rounded p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                        <option value="">Tất cả Trường học</option>
+                        <option value="1">THPT Lê Hồng Phong</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Loại thao tác (Action)</label>
+                    <select class="w-full border border-slate-300 rounded p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none mb-2 bg-white">
+                        <option value="">Tất cả Action</option>
+                        <option value="CREATE">CREATE (Tạo mới)</option>
+                        <option value="UPDATE">UPDATE (Cập nhật)</option>
+                        <option value="DELETE">DELETE (Xóa)</option>
+                        <option value="LOGIN">LOGIN (Đăng nhập)</option>
+                        <option value="VIEW_CONTENT">VIEW_CONTENT (Xem tài liệu)</option>
+                    </select>
+                    <select class="w-full border border-slate-300 rounded p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                        <option value="">Tất cả Entity</option>
+                        <option value="USER">USER (Người dùng)</option>
+                        <option value="CONTENT">CONTENT (Học liệu)</option>
+                        <option value="TENANT">TENANT (Mảng giảng dạy)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Tìm kiếm tự do</label>
+                    <input type="text" placeholder="IP Address, Email, Entity ID..." class="w-full border border-slate-300 rounded p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none mb-3">
+                    <div class="flex gap-2">
+                        <button class="flex-1 bg-slate-100 text-slate-700 py-2 rounded text-sm font-medium hover:bg-slate-200 transition">Xóa bộ lọc</button>
+                        <button class="flex-1 bg-blue-600 text-white py-2 rounded text-sm font-medium hover:bg-blue-700 transition">Áp dụng</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 flex-1 overflow-hidden flex flex-col">
+            <div class="overflow-x-auto flex-1">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
+                        <tr>
+                            <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider w-40">Thời gian</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Tác nhân (Actor)</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Ngữ cảnh</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Sự kiện (Event)</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right w-24">Metadata</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200">
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="px-6 py-4">
+                                <div class="text-sm text-slate-800">23/04/2026</div>
+                                <div class="text-xs text-slate-500 font-mono mt-0.5">20:15:32 +07</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="font-medium text-slate-800 text-sm">admin@daihoc.io.vn</div>
+                                <div class="text-xs font-mono text-slate-500 mt-0.5">IP: 14.248.82.112</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="px-2 py-1 text-[10px] font-bold bg-slate-100 text-slate-600 rounded">PLATFORM</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-2">
+                                    <span class="px-2 py-0.5 text-xs font-bold bg-red-100 text-red-700 rounded border border-red-200">DELETE</span>
+                                    <span class="text-sm font-medium text-slate-700">USER</span>
+                                </div>
+                                <div class="text-[11px] font-mono text-slate-400 mt-1 truncate w-48">ID: 8f13-970c...</div>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <button onclick="openLogDrawer('delete')" class="text-blue-600 hover:text-blue-800 font-medium text-sm px-3 py-1 bg-blue-50 hover:bg-blue-100 rounded transition">Xem JSON</button>
+                            </td>
+                        </tr>
+
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="px-6 py-4">
+                                <div class="text-sm text-slate-800">23/04/2026</div>
+                                <div class="text-xs text-slate-500 font-mono mt-0.5">19:42:05 +07</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="font-medium text-slate-800 text-sm">truongmang.stem@...</div>
+                                <div class="text-xs font-mono text-slate-500 mt-0.5">IP: 115.79.22.45</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="px-2 py-1 text-[10px] font-bold bg-indigo-100 text-indigo-700 rounded">STEM</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-2">
+                                    <span class="px-2 py-0.5 text-xs font-bold bg-blue-100 text-blue-700 rounded border border-blue-200">UPDATE</span>
+                                    <span class="text-sm font-medium text-slate-700">CONTENT_ITEM</span>
+                                </div>
+                                <div class="text-[11px] font-mono text-slate-400 mt-1 truncate w-48">ID: 4d51-a5d7...</div>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <button onclick="openLogDrawer('update')" class="text-blue-600 hover:text-blue-800 font-medium text-sm px-3 py-1 bg-blue-50 hover:bg-blue-100 rounded transition">Xem JSON</button>
+                            </td>
+                        </tr>
+
+                        <tr class="hover:bg-slate-50 transition bg-orange-50/50">
+                            <td class="px-6 py-4">
+                                <div class="text-sm text-slate-800">23/04/2026</div>
+                                <div class="text-xs text-slate-500 font-mono mt-0.5">08:15:11 +07</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="font-medium text-slate-800 text-sm">Unknown / System</div>
+                                <div class="text-xs font-mono text-red-500 mt-0.5 font-bold">IP: 45.33.22.11 (RU)</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="px-2 py-1 text-[10px] font-bold bg-slate-100 text-slate-600 rounded">AUTH</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-2">
+                                    <span class="px-2 py-0.5 text-xs font-bold bg-orange-100 text-orange-700 rounded border border-orange-200">LOGIN_FAILED</span>
+                                    <span class="text-sm font-medium text-slate-700">USER_ACCOUNT</span>
+                                </div>
+                                <div class="text-[11px] text-slate-500 mt-1">Brute-force attempt detected</div>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <button onclick="openLogDrawer('security')" class="text-blue-600 hover:text-blue-800 font-medium text-sm px-3 py-1 bg-blue-50 hover:bg-blue-100 rounded transition">Xem JSON</button>
+                            </td>
+                        </tr>
+
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="px-6 py-4">
+                                <div class="text-sm text-slate-800">23/04/2026</div>
+                                <div class="text-xs text-slate-500 font-mono mt-0.5">07:30:00 +07</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="font-medium text-slate-800 text-sm">cogiao@thptlhp.edu.vn</div>
+                                <div class="text-xs font-mono text-slate-500 mt-0.5">IP: 14.168.1.1</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex gap-1">
+                                    <span class="px-2 py-1 text-[10px] font-bold bg-indigo-100 text-indigo-700 rounded">STEM</span>
+                                    <span class="px-2 py-1 text-[10px] font-bold bg-slate-100 text-slate-600 rounded">LHP-HCM</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-2">
+                                    <span class="px-2 py-0.5 text-xs font-bold bg-emerald-100 text-emerald-700 rounded border border-emerald-200">VIEW</span>
+                                    <span class="text-sm font-medium text-slate-700">CONTENT_VIDEO</span>
+                                </div>
+                                <div class="text-[11px] font-mono text-slate-400 mt-1 truncate w-48">File: robot_lesson1.mp4</div>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <button class="text-slate-400 cursor-not-allowed font-medium text-sm px-3 py-1 border border-slate-200 rounded" disabled>N/A</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-between items-center text-sm text-slate-500">
+                <div>Hiển thị 1 - 4 trong số 1.2M+ logs</div>
+                <div class="flex gap-2">
+                    <button class="px-3 py-1 border border-slate-300 rounded bg-white hover:bg-slate-50 disabled:opacity-50" disabled>Trước</button>
+                    <button class="px-3 py-1 border border-slate-300 rounded bg-white hover:bg-slate-50">Sau</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="logDrawer" class="fixed inset-0 hidden z-50">
+    <div class="fixed inset-0 drawer-shadow backdrop-blur-sm transition-opacity" onclick="closeLogDrawer()"></div>
+    
+    <div class="fixed right-0 top-0 bottom-0 w-full max-w-xl bg-white shadow-2xl flex flex-col transition-transform duration-300 translate-x-full" id="drawerContent">
+        
+        <div class="p-6 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+            <div>
+                <h2 class="text-xl font-bold text-slate-800">Chi tiết Log Event</h2>
+                <p class="text-xs text-slate-500 font-mono mt-1" id="logId">Log ID: 9028441</p>
+            </div>
+            <button onclick="closeLogDrawer()" class="text-slate-400 hover:text-slate-700 text-2xl transition">&times;</button>
+        </div>
+        
+        <div class="p-6 flex-1 overflow-y-auto bg-slate-50/50">
+            
+            <div class="mb-4">
+                <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-2">Request Context</h3>
+                <div class="bg-white p-4 rounded-lg border border-slate-200 text-sm space-y-2">
+                    <div class="flex justify-between border-b border-slate-100 pb-2">
+                        <span class="text-slate-500">User Agent</span>
+                        <span class="font-mono text-[11px] text-slate-700 text-right w-2/3">Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/123.0.0.0 Safari/537.36</span>
+                    </div>
+                    <div class="flex justify-between pt-2">
+                        <span class="text-slate-500">Device / OS</span>
+                        <span class="text-slate-700 font-medium">Mac OS / Desktop</span>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-2">Metadata Payload (JSON)</h3>
+                <div class="json-viewer" id="jsonContent">
+                    </div>
+            </div>
+            
+        </div>
+        
+        <div class="p-4 border-t border-slate-200 bg-white flex justify-end">
+            <button onclick="closeLogDrawer()" class="bg-slate-100 border border-slate-300 text-slate-700 px-6 py-2 rounded-lg text-sm font-medium hover:bg-slate-200 transition">Đóng</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const logDrawer = document.getElementById('logDrawer');
+    const drawerContent = document.getElementById('drawerContent');
+    const jsonContent = document.getElementById('jsonContent');
+
+    // Dữ liệu giả lập (Mockup Data) cho các log khác nhau
+    const mockData = {
+        'delete': {
+            "target_entity": "user_account",
+            "entity_id": "8f13-970c-818b-23c6a4d51b3a",
+            "reason": "Admin initiated deletion",
+            "previous_state": {
+                "username": "gv.cu",
+                "email": "gv.cu@truong.edu.vn",
+                "status": "LOCKED"
+            }
+        },
+        'update': {
+            "target_entity": "content_item",
+            "entity_id": "4d51-a5d7-952f-042aaf1094f5",
+            "changes": {
+                "publish_status": {
+                    "old": "DRAFT",
+                    "new": "PUBLISHED"
+                },
+                "is_downloadable": {
+                    "old": false,
+                    "new": true
+                }
+            }
+        },
+        'security': {
+            "alert_type": "BRUTE_FORCE_ATTACK",
+            "target_email": "admin@daihoc.io.vn",
+            "failed_attempts_recorded": 6,
+            "action_taken": "ACCOUNT_LOCKED",
+            "threat_intel": {
+                "ip_reputation": "MALICIOUS",
+                "country": "RU"
+            }
+        }
+    };
+
+    // Hàm render JSON với màu sắc (Syntax Highlighting cơ bản)
+    function syntaxHighlight(json) {
+        if (typeof json != 'string') {
+            json = JSON.stringify(json, undefined, 4);
+        }
+        json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+            let cls = 'json-number';
+            if (/^"/.test(match)) {
+                if (/:$/.test(match)) {
+                    cls = 'json-key'; // Key
+                } else {
+                    cls = 'json-string'; // String
+                }
+            } else if (/true|false/.test(match)) {
+                cls = 'json-number'; // Boolean (dùng màu vàng cho dễ nhìn)
+            } else if (/null/.test(match)) {
+                cls = 'json-number'; // Null
+            }
+            return '<span class="' + cls + '">' + match + '</span>';
+        });
+    }
+
+    function openLogDrawer(type) {
+        // Render JSON Data
+        const data = mockData[type] || {};
+        jsonContent.innerHTML = '<pre>' + syntaxHighlight(data) + '</pre>';
+
+        // Mở Drawer với animation
+        logDrawer.classList.remove('hidden');
+        setTimeout(() => {
+            drawerContent.classList.remove('translate-x-full');
+            drawerContent.classList.add('translate-x-0');
+        }, 10);
+    }
+
+    function closeLogDrawer() {
+        drawerContent.classList.remove('translate-x-0');
+        drawerContent.classList.add('translate-x-full');
+        setTimeout(() => {
+            logDrawer.classList.add('hidden');
+        }, 300);
+    }
+</script>
+
+</body>
+</html>

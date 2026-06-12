@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đang học: Lập trình Python - STEM Education</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; } /* Dark mode cho phòng học */
+        
+        /* 1. CSS CHO WATERMARK ĐỘNG */
+        #dynamic-watermark {
+            position: absolute;
+            pointer-events: none; /* Cho phép click xuyên qua */
+            z-index: 100;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 14px;
+            white-space: nowrap;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            transition: all 5s ease-in-out; /* Tạo hiệu ứng trôi chậm */
+        }
+
+        /* 2. CẤU TRÚC VIEWER */
+        .viewer-container {
+            aspect-ratio: 16 / 9;
+            background-color: #000;
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* 3. PDF VIEWER TOOLBAR */
+        .pdf-toolbar {
+            background: rgba(30, 41, 59, 0.9);
+            backdrop-filter: blur(8px);
+        }
+
+        /* 4. CHỐNG COPY */
+        .no-select {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
+    </style>
+</head>
+<body class="flex flex-col h-screen no-select" oncontextmenu="return false;">
+
+    <header class="h-14 border-b border-slate-800 flex items-center justify-between px-6 bg-slate-900/50">
+        <div class="flex items-center gap-4">
+            <a href="#" class="text-slate-400 hover:text-white transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            </a>
+            <div class="flex flex-col">
+                <h1 class="text-sm font-bold truncate max-w-md">Bài 2.2: Kiểu dữ liệu & Biến trong Python</h1>
+                <span class="text-[10px] text-emerald-500 font-bold uppercase tracking-widest">Đang học • 45% Hoàn thành</span>
+            </div>
+        </div>
+        <div class="flex gap-4">
+            <button class="bg-emerald-600 text-white px-4 py-1.5 rounded text-xs font-bold hover:bg-emerald-700 transition">Tiếp theo →</button>
+        </div>
+    </header>
+
+    <main class="flex-1 flex overflow-hidden">
+        
+        <div class="flex-[7] p-6 overflow-y-auto flex flex-col gap-6">
+            
+            <div class="viewer-container group" id="main-viewer">
+                
+                <div id="dynamic-watermark">
+                    Nguyễn Thị A - 14.168.1.1 - 23/04/2026 21:30
+                </div>
+
+                <div id="video-mode" class="absolute inset-0 flex items-center justify-center">
+                    <img src="https://images.unsplash.com/photo-1526379095098-d400fd0bf935?auto=format&fit=crop&w=1200&q=80" class="w-full h-full object-cover opacity-50">
+                    <div class="absolute inset-0 bg-black/40"></div>
+                    
+                    <div class="absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div class="flex flex-col gap-3">
+                            <div class="h-1 w-full bg-white/20 rounded-full cursor-pointer relative">
+                                <div class="absolute left-0 top-0 bottom-0 bg-emerald-500 rounded-full" style="width: 45%"></div>
+                                <div class="absolute left-[45%] top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg"></div>
+                            </div>
+                            <div class="flex justify-between items-center text-white">
+                                <div class="flex items-center gap-4">
+                                    <button class="text-xl">▶</button>
+                                    <button class="text-lg">🔊</button>
+                                    <span class="text-xs font-mono">11:05 / 24:10</span>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <button class="text-xs border border-white/30 px-2 py-0.5 rounded">1.0x</button>
+                                    <button class="text-lg">⚙️</button>
+                                    <button class="text-lg">⛶</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="w-20 h-20 bg-emerald-600/80 rounded-full flex items-center justify-center text-white text-3xl pl-2 shadow-2xl hover:scale-110 transition">▶</button>
+                </div>
+
+                <div id="pdf-mode" class="absolute inset-0 bg-slate-800 hidden flex-col">
+                    <div class="pdf-toolbar h-10 flex items-center justify-between px-4 text-white z-20">
+                        <div class="flex items-center gap-4">
+                            <span class="text-xs font-medium">Slide_Bai_Giang.pdf</span>
+                            <div class="h-4 w-px bg-white/20"></div>
+                            <div class="flex items-center gap-2">
+                                <button class="w-6 h-6 hover:bg-white/10 rounded">-</button>
+                                <span class="text-xs">100%</span>
+                                <button class="w-6 h-6 hover:bg-white/10 rounded">+</button>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 text-xs">
+                            <button class="hover:text-emerald-400">Trang trước</button>
+                            <span>5 / 24</span>
+                            <button class="hover:text-emerald-400">Trang sau</button>
+                        </div>
+                    </div>
+                    <div class="flex-1 overflow-y-auto p-8 flex justify-center bg-slate-700">
+                        <div class="w-[600px] h-[800px] bg-white shadow-2xl relative">
+                            <div class="p-10 text-slate-800">
+                                <h2 class="text-2xl font-bold mb-6">Chương 2: Biến trong Python</h2>
+                                <p class="mb-4">Biến là tên dùng để tham chiếu đến các đối tượng trong bộ nhớ...</p>
+                                <div class="bg-slate-100 p-4 rounded font-mono text-sm">x = 5<br>y = "Hello World"</div>
+                            </div>
+                            <div class="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none rotate-45 text-4xl font-bold text-slate-900">
+                                Nguyễn Thị A - 14.168.1.1
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-4">
+                <button onclick="switchMode('video')" id="btn-video" class="px-6 py-2 rounded-full text-xs font-bold bg-emerald-600 text-white">Xem Video</button>
+                <button onclick="switchMode('pdf')" id="btn-pdf" class="px-6 py-2 rounded-full text-xs font-bold bg-slate-800 text-slate-400 hover:bg-slate-700 transition">Tài liệu PDF</button>
+                <button class="px-6 py-2 rounded-full text-xs font-bold bg-slate-800 text-slate-400 hover:bg-slate-700 transition">Ghi chú cá nhân</button>
+            </div>
+
+            <div class="mt-4 border-t border-slate-800 pt-8">
+                <h3 class="text-lg font-bold mb-6 flex items-center gap-2">
+                    💬 Thảo luận & Hỏi đáp <span class="bg-slate-800 text-slate-400 px-2 py-0.5 rounded text-xs">12</span>
+                </h3>
+                
+                <div class="flex gap-4 mb-10">
+                    <img src="https://i.pravatar.cc/150?img=32" class="w-10 h-10 rounded-full">
+                    <div class="flex-1">
+                        <textarea placeholder="Bạn có thắc mắc gì về bài giảng này không?" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-4 text-sm focus:ring-2 focus:ring-emerald-500 outline-none transition"></textarea>
+                        <div class="flex justify-end mt-2">
+                            <button class="bg-emerald-600 text-white px-6 py-2 rounded-lg text-sm font-bold shadow-lg shadow-emerald-900/20">Gửi câu hỏi</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-8">
+                    <div class="flex gap-4">
+                        <img src="https://i.pravatar.cc/150?img=11" class="w-10 h-10 rounded-full">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="font-bold text-sm">Học sinh Lê Nam</span>
+                                <span class="text-[10px] text-slate-500">2 giờ trước</span>
+                            </div>
+                            <p class="text-sm text-slate-300 leading-relaxed">Em vẫn chưa hiểu rõ sự khác biệt giữa biến toàn cục và biến cục bộ trong Python ạ. Thầy cô giải thích giúp em đoạn phút 12:45 với.</p>
+                            <div class="flex gap-4 mt-3">
+                                <button class="text-xs text-slate-500 hover:text-emerald-500 font-bold">Thích</button>
+                                <button class="text-xs text-slate-500 hover:text-emerald-500 font-bold">Trả lời</button>
+                            </div>
+
+                            <div class="mt-6 flex gap-4 border-l-2 border-slate-800 pl-6">
+                                <div class="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center text-xs font-bold">GV</div>
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="font-bold text-sm text-emerald-500">Giáo viên hỗ trợ</span>
+                                        <span class="text-[10px] text-slate-500">1 giờ trước</span>
+                                    </div>
+                                    <p class="text-sm text-slate-300 leading-relaxed">Chào Nam, biến cục bộ chỉ tồn tại bên trong hàm nơi nó được khai báo. Còn biến toàn cục có thể truy cập ở bất cứ đâu trong chương trình. Em xem lại ví dụ ở phút 13:10 nhé!</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <aside class="flex-[3] bg-slate-900 border-l border-slate-800 overflow-y-auto">
+            <div class="p-6 border-b border-slate-800">
+                <h3 class="font-bold text-sm">Danh sách bài học</h3>
+            </div>
+            <div class="divide-y divide-slate-800">
+                <div class="p-4 flex gap-3 hover:bg-slate-800 cursor-pointer transition">
+                    <div class="w-20 h-12 bg-slate-700 rounded flex-shrink-0 flex items-center justify-center text-xs opacity-50">🎥</div>
+                    <div class="flex-1">
+                        <h4 class="text-xs font-bold text-slate-400">2.1. Cài đặt Python</h4>
+                        <span class="text-[10px] text-slate-600">Đã hoàn thành</span>
+                    </div>
+                </div>
+                <div class="p-4 flex gap-3 bg-slate-800 border-l-4 border-emerald-500">
+                    <div class="w-20 h-12 bg-emerald-900/50 rounded flex-shrink-0 flex items-center justify-center text-xs text-emerald-500">▶</div>
+                    <div class="flex-1">
+                        <h4 class="text-xs font-bold text-white">2.2. Kiểu dữ liệu & Biến</h4>
+                        <div class="w-full bg-slate-700 h-1 rounded-full mt-2">
+                            <div class="bg-emerald-500 h-1 rounded-full" style="width: 45%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 flex gap-3 hover:bg-slate-800 cursor-pointer transition">
+                    <div class="w-20 h-12 bg-slate-700 rounded flex-shrink-0 flex items-center justify-center text-xs">📄</div>
+                    <div class="flex-1">
+                        <h4 class="text-xs font-bold text-slate-400">2.3. Slide Vòng lặp</h4>
+                        <span class="text-[10px] text-slate-600">Tiếp theo</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+    </main>
+
+    <script>
+        // 1. LOGIC WATERMARK DI CHUYỂN NGẪU NHIÊN
+        const watermark = document.getElementById('dynamic-watermark');
+        const container = document.getElementById('main-viewer');
+
+        function moveWatermark() {
+            const maxX = container.clientWidth - watermark.clientWidth - 50;
+            const maxY = container.clientHeight - watermark.clientHeight - 50;
+            
+            const randomX = Math.max(20, Math.floor(Math.random() * maxX));
+            const randomY = Math.max(20, Math.floor(Math.random() * maxY));
+            
+            watermark.style.left = randomX + 'px';
+            watermark.style.top = randomY + 'px';
+        }
+
+        setInterval(moveWatermark, 6000); // Di chuyển sau mỗi 6 giây
+        moveWatermark();
+
+        // 2. CHỐNG PHÍM TẮT IN / LƯU
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'p' || e.key === 's' || e.key === 'u' || e.key === 'c')) {
+                e.preventDefault();
+                alert('Vì lý do bảo mật, hành động này bị vô hiệu hóa.');
+            }
+        });
+
+        // 3. CHUYỂN ĐỔI CHẾ ĐỘ XEM (VIDEO / PDF)
+        function switchMode(mode) {
+            const video = document.getElementById('video-mode');
+            const pdf = document.getElementById('pdf-mode');
+            const btnVideo = document.getElementById('btn-video');
+            const btnPdf = document.getElementById('btn-pdf');
+
+            if (mode === 'video') {
+                video.classList.remove('hidden');
+                pdf.classList.add('hidden');
+                btnVideo.classList.add('bg-emerald-600', 'text-white');
+                btnVideo.classList.remove('bg-slate-800', 'text-slate-400');
+                btnPdf.classList.add('bg-slate-800', 'text-slate-400');
+                btnPdf.classList.remove('bg-emerald-600', 'text-white');
+            } else {
+                video.classList.add('hidden');
+                pdf.classList.remove('hidden');
+                btnPdf.classList.add('bg-emerald-600', 'text-white');
+                btnPdf.classList.remove('bg-slate-800', 'text-slate-400');
+                btnVideo.classList.add('bg-slate-800', 'text-slate-400');
+                btnVideo.classList.remove('bg-emerald-600', 'text-white');
+            }
+        }
+    </script>
+</body>
+</html>

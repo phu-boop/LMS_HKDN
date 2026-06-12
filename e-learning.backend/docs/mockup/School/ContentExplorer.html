@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khóa học - STEM Education</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        
+        /* Tùy chỉnh thanh cuộn */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        /* Hiệu ứng mượt mà cho Accordion */
+        .accordion-content { transition: max-height 0.3s ease-out; max-height: 0; overflow: hidden; }
+        .accordion-content.expanded { max-height: 500px; /* Số đủ lớn để chứa nội dung */ }
+        .rotate-icon { transition: transform 0.3s; }
+        .expanded-parent .rotate-icon { transform: rotate(180deg); }
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden">
+
+    <header class="bg-white border-b border-slate-200 flex-shrink-0 z-10">
+        <div class="px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center gap-4">
+                    <a href="#" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-500 transition" title="Quay lại Bàn làm việc">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
+                    </a>
+                    <div class="h-6 w-px bg-slate-200"></div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 bg-emerald-600 rounded flex items-center justify-center text-white font-bold text-xs">S</div>
+                        <span class="font-bold text-slate-800 text-sm hidden sm:block">Khối 10 - Chương trình STEM</span>
+                    </div>
+                </div>
+
+                <div class="hidden md:flex items-center gap-3 bg-slate-50 px-4 py-1.5 rounded-full border border-slate-200">
+                    <span class="text-xs font-medium text-slate-500">Tiến độ của bạn:</span>
+                    <div class="w-24 bg-slate-200 rounded-full h-2">
+                        <div class="bg-emerald-500 h-2 rounded-full" style="width: 35%"></div>
+                    </div>
+                    <span class="text-xs font-bold text-emerald-600">35%</span>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button class="text-slate-400 hover:text-slate-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+                    </button>
+                    <img src="https://i.pravatar.cc/150?img=32" alt="Avatar" class="w-8 h-8 rounded-full object-cover border border-slate-200 cursor-pointer">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+        
+        <aside class="w-80 bg-white border-r border-slate-200 flex flex-col flex-shrink-0 z-0 hidden lg:flex">
+            <div class="p-4 border-b border-slate-100 bg-slate-50">
+                <h2 class="font-bold text-slate-800 text-sm">Nội dung chương trình</h2>
+            </div>
+            
+            <div class="overflow-y-auto flex-1">
+                
+                <div class="border-b border-slate-100">
+                    <button class="w-full p-4 flex justify-between items-center text-left hover:bg-slate-50 transition" onclick="toggleAccordion('ch1', this)">
+                        <div class="flex-1">
+                            <h3 class="font-bold text-slate-800 text-sm">1. Giới thiệu tổng quan</h3>
+                            <div class="text-[11px] text-slate-500 mt-1 flex items-center gap-2">
+                                <span>2/2 Bài học</span>
+                                <span class="text-emerald-500 font-bold flex items-center gap-0.5"><svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg> Hoàn thành</span>
+                            </div>
+                        </div>
+                        <svg class="w-4 h-4 text-slate-400 rotate-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div id="ch1" class="accordion-content bg-slate-50 border-t border-slate-100">
+                        <a href="#" class="block py-2.5 px-6 text-sm text-slate-600 hover:text-emerald-600 hover:bg-slate-100 transition flex items-center gap-3">
+                            <span class="text-emerald-500 bg-emerald-100 rounded-full p-0.5"><svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg></span>
+                            1.1. STEM là gì?
+                        </a>
+                        <a href="#" class="block py-2.5 px-6 text-sm text-slate-600 hover:text-emerald-600 hover:bg-slate-100 transition flex items-center gap-3">
+                            <span class="text-emerald-500 bg-emerald-100 rounded-full p-0.5"><svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg></span>
+                            1.2. Định hướng nghề nghiệp
+                        </a>
+                    </div>
+                </div>
+
+                <div class="border-b border-slate-100 expanded-parent bg-emerald-50/30">
+                    <button class="w-full p-4 flex justify-between items-center text-left hover:bg-emerald-50 transition" onclick="toggleAccordion('ch2', this)">
+                        <div class="flex-1">
+                            <h3 class="font-bold text-emerald-800 text-sm">2. Lập trình Cơ bản (Python)</h3>
+                            <div class="text-[11px] text-slate-500 mt-1 flex items-center gap-2">
+                                <span>1/4 Bài học</span>
+                            </div>
+                        </div>
+                        <svg class="w-4 h-4 text-emerald-600 rotate-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div id="ch2" class="accordion-content expanded bg-white border-t border-emerald-100">
+                        <a href="#" class="block py-2.5 px-6 text-sm text-slate-600 hover:text-emerald-600 hover:bg-slate-50 transition flex items-center gap-3">
+                            <span class="text-emerald-500 bg-emerald-100 rounded-full p-0.5"><svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg></span>
+                            2.1. Cài đặt môi trường
+                        </a>
+                        <a href="#" class="block py-2.5 px-6 text-sm font-semibold text-emerald-700 bg-emerald-50 border-r-4 border-emerald-500 flex items-center gap-3">
+                            <span class="w-4 h-4 border-2 border-emerald-500 rounded-full flex items-center justify-center"><div class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div></span>
+                            2.2. Kiểu dữ liệu & Biến
+                        </a>
+                        <a href="#" class="block py-2.5 px-6 text-sm text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition flex items-center gap-3">
+                            <span class="w-4 h-4 border-2 border-slate-300 rounded-full"></span>
+                            2.3. Vòng lặp For/While
+                        </a>
+                        <a href="#" class="block py-2.5 px-6 text-sm text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition flex items-center gap-3">
+                            <span class="w-4 h-4 border-2 border-slate-300 rounded-full"></span>
+                            2.4. Bài tập Lab 1
+                        </a>
+                    </div>
+                </div>
+
+                <div class="border-b border-slate-100">
+                    <button class="w-full p-4 flex justify-between items-center text-left hover:bg-slate-50 transition" onclick="toggleAccordion('ch3', this)">
+                        <div class="flex-1">
+                            <h3 class="font-bold text-slate-800 text-sm">3. Thiết kế phần cứng (IoT)</h3>
+                            <div class="text-[11px] text-slate-500 mt-1 flex items-center gap-2">
+                                <span>0/5 Bài học</span>
+                            </div>
+                        </div>
+                        <svg class="w-4 h-4 text-slate-400 rotate-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div id="ch3" class="accordion-content bg-slate-50 border-t border-slate-100">
+                         <div class="p-4 text-xs text-slate-400 text-center">Các bài học sẽ hiển thị ở đây</div>
+                    </div>
+                </div>
+
+            </div>
+        </aside>
+
+        <main class="flex-1 overflow-y-auto bg-slate-50/50 p-6 md:p-10">
+            
+            <div class="max-w-4xl mx-auto">
+                <div class="mb-8">
+                    <nav class="flex text-[11px] text-slate-500 font-medium mb-3">
+                        <ol class="flex items-center space-x-2">
+                            <li><a href="#" class="hover:text-emerald-600 transition">Chương trình Khối 10</a></li>
+                            <li><span class="text-slate-300">/</span></li>
+                            <li class="text-emerald-700">Lập trình Cơ bản (Python)</li>
+                        </ol>
+                    </nav>
+                    <h1 class="text-3xl font-bold text-slate-800 mb-3">Lập trình Cơ bản (Python)</h1>
+                    <p class="text-sm text-slate-600 leading-relaxed">Nắm vững các khái niệm nền tảng về tư duy máy tính, thuật toán và ngôn ngữ lập trình Python để làm cơ sở cho các dự án Trí tuệ nhân tạo sau này.</p>
+                </div>
+
+                <div class="mb-10">
+                    <button class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-xl text-sm font-bold transition shadow-lg shadow-emerald-200 flex items-center gap-2">
+                        <span>▶ Tiếp tục: 2.2. Kiểu dữ liệu & Biến</span>
+                    </button>
+                </div>
+
+                <div class="space-y-4">
+                    
+                    <div class="bg-white border border-slate-200 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4 hover:border-emerald-300 transition shadow-sm">
+                        <div class="w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center text-2xl flex-shrink-0 relative">
+                            🎥
+                            <div class="absolute -top-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full text-white flex items-center justify-center border-2 border-white">
+                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                            </div>
+                        </div>
+                        
+                        <div class="flex-1">
+                            <h3 class="text-base font-bold text-slate-800 mb-1">2.1. Cài đặt môi trường Python 3.10</h3>
+                            <div class="flex items-center gap-3 text-xs text-slate-500">
+                                <span class="flex items-center gap-1">⏱️ Video • 15:20</span>
+                                <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                                <span class="text-emerald-600 font-medium">Hoàn thành lúc 08:30 hôm nay</span>
+                            </div>
+                        </div>
+                        
+                        <button class="w-full sm:w-auto mt-3 sm:mt-0 px-4 py-2 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-lg text-sm font-medium transition text-center border border-slate-200">
+                            Xem lại
+                        </button>
+                    </div>
+
+                    <div class="bg-white border-2 border-emerald-400 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4 shadow-md relative overflow-hidden">
+                        <div class="absolute top-0 left-0 bottom-0 w-1 bg-emerald-500"></div>
+
+                        <div class="w-12 h-12 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl flex-shrink-0">
+                            🎥
+                        </div>
+                        
+                        <div class="flex-1 w-full">
+                            <h3 class="text-base font-bold text-emerald-800 mb-1">2.2. Kiểu dữ liệu & Biến trong Python</h3>
+                            <div class="flex items-center gap-3 text-xs text-slate-500 mb-2">
+                                <span class="flex items-center gap-1">⏱️ Video • 24:10</span>
+                                <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                                <span>2 Tài liệu đính kèm</span>
+                            </div>
+                            <div class="flex items-center gap-3 mt-2 w-full max-w-sm">
+                                <div class="w-full bg-slate-100 rounded-full h-1.5 flex-1">
+                                    <div class="bg-emerald-500 h-1.5 rounded-full" style="width: 45%"></div>
+                                </div>
+                                <span class="text-[10px] font-bold text-emerald-600 whitespace-nowrap">Đang xem (11:05)</span>
+                            </div>
+                        </div>
+                        
+                        <button class="w-full sm:w-auto mt-4 sm:mt-0 px-6 py-2.5 bg-emerald-100 text-emerald-800 hover:bg-emerald-200 rounded-lg text-sm font-bold transition text-center border border-emerald-200 whitespace-nowrap">
+                            Học tiếp
+                        </button>
+                    </div>
+
+                    <div class="bg-white border border-slate-200 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4 hover:border-slate-300 transition shadow-sm opacity-80 hover:opacity-100">
+                        <div class="w-12 h-12 rounded-lg bg-slate-50 flex items-center justify-center text-2xl flex-shrink-0">
+                            📄
+                        </div>
+                        
+                        <div class="flex-1">
+                            <h3 class="text-base font-bold text-slate-700 mb-1">2.3. Slide tóm tắt: Vòng lặp For/While</h3>
+                            <div class="flex items-center gap-3 text-xs text-slate-500">
+                                <span class="flex items-center gap-1">📑 Tài liệu đọc • 12 trang</span>
+                            </div>
+                        </div>
+                        
+                        <button class="w-full sm:w-auto mt-3 sm:mt-0 px-4 py-2 bg-white text-emerald-600 border border-emerald-200 hover:bg-emerald-50 rounded-lg text-sm font-medium transition text-center">
+                            Bắt đầu học
+                        </button>
+                    </div>
+
+                    <div class="bg-white border border-slate-200 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4 hover:border-slate-300 transition shadow-sm opacity-80 hover:opacity-100">
+                        <div class="w-12 h-12 rounded-lg bg-slate-50 flex items-center justify-center text-2xl flex-shrink-0">
+                            📝
+                        </div>
+                        
+                        <div class="flex-1">
+                            <h3 class="text-base font-bold text-slate-700 mb-1">2.4. Bài tập Thực hành Lab 1</h3>
+                            <div class="flex items-center gap-3 text-xs text-slate-500">
+                                <span class="flex items-center gap-1">⏳ Bài tập nộp file</span>
+                                <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                                <span class="text-amber-600 font-medium">Hạn nộp: 25/04/2026</span>
+                            </div>
+                        </div>
+                        
+                        <button class="w-full sm:w-auto mt-3 sm:mt-0 px-4 py-2 bg-white text-emerald-600 border border-emerald-200 hover:bg-emerald-50 rounded-lg text-sm font-medium transition text-center">
+                            Làm bài
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // JS đơn giản để làm Accordion có thể click được trong màn hình Mockup
+        function toggleAccordion(id, button) {
+            const content = document.getElementById(id);
+            const parent = button.parentElement;
+            
+            if (content.classList.contains('expanded')) {
+                content.classList.remove('expanded');
+                parent.classList.remove('expanded-parent');
+            } else {
+                content.classList.add('expanded');
+                parent.classList.add('expanded-parent');
+            }
+        }
+    </script>
+</body>
+</html>

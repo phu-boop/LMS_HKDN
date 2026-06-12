@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIG LMS - Super Admin Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --border: #e5e7eb;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #111827;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+        }
+
+        select, button {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            font-size: 14px;
+            cursor: pointer;
+            outline: none;
+        }
+
+        select {
+            background-color: white;
+            color: var(--text-main);
+        }
+
+        button.primary {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            font-weight: 500;
+        }
+
+        button.primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* KPI Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .card.clickable {
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card.clickable:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: 1px solid var(--primary);
+        }
+
+        .card-title {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .card-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+
+        .card-trend {
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .trend-up { color: var(--success); }
+        .trend-down { color: var(--danger); }
+
+        /* Main Content Layout */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        .chart-container {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .chart-container h3, .alerts-container h3 {
+            margin-top: 0;
+            margin-bottom: 16px;
+            font-size: 16px;
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        /* Alerts List */
+        .alerts-container {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .alert-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .alert-item:last-child {
+            border-bottom: none;
+        }
+
+        .alert-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .alert-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .alert-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge.critical { background: #fee2e2; color: var(--danger); }
+        .badge.warning { background: #fef3c7; color: var(--warning); }
+        .badge.normal { background: #d1fae5; color: var(--success); }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .modal-header h2 { margin: 0; font-size: 18px; }
+        .close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted); padding: 0;}
+        .close-btn:hover { color: var(--danger); }
+
+        .tenant-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .tenant-list li {
+            padding: 10px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .tenant-list li:last-child { border-bottom: none; }
+        .tenant-code { font-weight: 600; color: var(--primary); }
+        .tenant-name { color: var(--text-muted); font-size: 14px;}
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-grid { grid-template-columns: 1fr; }
+            .header { flex-direction: column; align-items: flex-start; gap: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>Dashboard Tổng quan Hệ thống</h1>
+            <div class="controls">
+                <select id="timeFilter" onchange="updateChart()">
+                    <option value="24h">24 giờ qua</option>
+                    <option value="7d">7 ngày qua</option>
+                    <option value="30d">30 ngày qua</option>
+                </select>
+                <button class="primary" onclick="refreshData()">🔄 Làm mới</button>
+            </div>
+        </div>
+
+        <div class="kpi-grid">
+            <div class="card clickable" title="Click để xem danh sách" onclick="openTenantModal()">
+                <div class="card-title">Mảng giảng dạy (Tenants)</div>
+                <div class="card-value">12</div>
+                <div class="card-trend trend-up">↑ Tăng 2 so với tháng trước</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Trường học đang sử dụng</div>
+                <div class="card-value">480</div>
+                <div class="card-trend trend-up">↑ Tăng 15 so với tháng trước</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Sessions đang Active</div>
+                <div class="card-value" id="activeSessions">3,250</div>
+                <div class="card-trend trend-up">Mức tải: Trung bình cao</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Sức khỏe hệ thống</div>
+                <div class="card-value" style="color: var(--danger);">Cảnh báo</div>
+                <div class="card-trend">Kiểm tra thông số lưu trữ</div>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <div class="chart-container">
+                <h3>Lưu lượng truy cập (Sessions)</h3>
+                <div class="canvas-wrapper">
+                    <canvas id="trafficChart"></canvas>
+                </div>
+            </div>
+
+            <div class="alerts-container">
+                <h3>Cảnh báo Tài nguyên</h3>
+                
+                <div class="alert-item">
+                    <div class="alert-info">
+                        <span class="alert-name">Lưu trữ (Storage)</span>
+                        <span class="alert-desc">S3 Bucket / Database</span>
+                    </div>
+                    <div>
+                        <span style="font-weight:bold; margin-right:8px;">92%</span>
+                        <span class="badge critical">Nguy cấp</span>
+                    </div>
+                </div>
+
+                <div class="alert-item">
+                    <div class="alert-info">
+                        <span class="alert-name">CPU Usage</span>
+                        <span class="alert-desc">Cluster EC2 Core</span>
+                    </div>
+                    <div>
+                        <span style="font-weight:bold; margin-right:8px;">78%</span>
+                        <span class="badge warning">Cảnh báo</span>
+                    </div>
+                </div>
+
+                <div class="alert-item">
+                    <div class="alert-info">
+                        <span class="alert-name">RAM Allocation</span>
+                        <span class="alert-desc">Redis & App Server</span>
+                    </div>
+                    <div>
+                        <span style="font-weight:bold; margin-right:8px;">45%</span>
+                        <span class="badge normal">Bình thường</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="tenantModal" onclick="closeTenantModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2>Danh sách Mảng giảng dạy</h2>
+                <button class="close-btn" onclick="closeTenantModal()">&times;</button>
+            </div>
+            <ul class="tenant-list">
+                <li><span class="tenant-code">STEM</span> <span class="tenant-name">Khoa học & Kỹ thuật</span></li>
+                <li><span class="tenant-code">ENGLISH</span> <span class="tenant-name">Trung tâm Anh ngữ</span></li>
+                <li><span class="tenant-code">KNS</span> <span class="tenant-name">Kỹ năng sống</span></li>
+                <li><span class="tenant-code">MATH</span> <span class="tenant-name">Toán tư duy</span></li>
+                <li><span class="tenant-code">ART</span> <span class="tenant-name">Năng khiếu Mỹ thuật</span></li>
+                <li><span class="tenant-code">MUSIC</span> <span class="tenant-name">Học viện Âm nhạc</span></li>
+                <li><span class="tenant-code">SPORT</span> <span class="tenant-name">Giáo dục Thể chất</span></li>
+                <li><span class="tenant-code">CODE</span> <span class="tenant-name">Lập trình Trẻ em</span></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // --- Dữ liệu giả lập cho biểu đồ ---
+        const labels24h = ['00:00', '02:00', '04:00', '06:00', '08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00'];
+        const data24h = [150, 100, 80, 500, 3100, 2800, 1500, 3250, 2600, 1800, 1200, 400]; // Đỉnh lúc 8h và 14h
+
+        const labels7d = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+        const data7d = [15000, 16200, 15800, 17000, 16500, 8000, 6000];
+
+        const labels30d = ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4'];
+        const data30d = [85000, 92000, 88000, 95000];
+
+        // --- Cấu hình Chart.js ---
+        const ctx = document.getElementById('trafficChart').getContext('2d');
+        let trafficChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels24h,
+                datasets: [{
+                    label: 'Số lượng Session',
+                    data: data24h,
+                    borderColor: '#2563eb',
+                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4, // Làm cong đường đồ thị
+                    fill: true,
+                    pointBackgroundColor: '#2563eb',
+                    pointRadius: 3,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            label: function(context) {
+                                return context.parsed.y.toLocaleString() + ' Sessions';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#e5e7eb' } },
+                    x: { grid: { display: false } }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'x',
+                    intersect: false
+                }
+            }
+        });
+
+        // --- Logic Đổi Bộ Lọc Thời Gian ---
+        function updateChart() {
+            const filter = document.getElementById('timeFilter').value;
+            
+            if (filter === '24h') {
+                trafficChart.data.labels = labels24h;
+                trafficChart.data.datasets[0].data = data24h;
+            } else if (filter === '7d') {
+                trafficChart.data.labels = labels7d;
+                trafficChart.data.datasets[0].data = data7d;
+            } else if (filter === '30d') {
+                trafficChart.data.labels = labels30d;
+                trafficChart.data.datasets[0].data = data30d;
+            }
+            
+            trafficChart.update();
+        }
+
+        // --- Logic Nút Refresh ---
+        function refreshData() {
+            const btn = document.querySelector('button.primary');
+            btn.innerHTML = '⏳ Đang tải...';
+            btn.style.opacity = '0.7';
+            
+            // Giả lập call API mất 1s
+            setTimeout(() => {
+                // Đổi số Active Sessions ngẫu nhiên
+                const newSessions = Math.floor(Math.random() * (3500 - 3000 + 1)) + 3000;
+                document.getElementById('activeSessions').innerText = newSessions.toLocaleString();
+                
+                btn.innerHTML = '🔄 Làm mới';
+                btn.style.opacity = '1';
+                updateChart(); // Vẽ lại chart hiện tại
+            }, 800);
+        }
+
+        // --- Logic Modal Tenant ---
+        const modal = document.getElementById('tenantModal');
+
+        function openTenantModal() {
+            modal.classList.add('active');
+        }
+
+        function closeTenantModal(event) {
+            // Nếu click vào background mờ hoặc nút X thì đóng
+            if (!event || event.target === modal) {
+                modal.classList.remove('active');
+            }
+        }
+    </script>
+</body>
+</html>

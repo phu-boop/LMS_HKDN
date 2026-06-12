@@ -1,0 +1,94 @@
+import { UserCredential } from 'firebase/auth';
+
+// ----------------------------------------------------------------------
+
+export type ActionMap<M extends { [index: string]: any }> = {
+  [Key in keyof M]: M[Key] extends undefined
+    ? {
+        type: Key;
+      }
+    : {
+        type: Key;
+        payload: M[Key];
+      };
+};
+
+export type AuthenticatedUser = {
+  id: string;
+  email: string;
+  displayName: string;
+  name?: string | null;
+  photoURL: string | null;
+  avatarUrl?: string | null;
+  role: string;
+  username: string | null;
+  tenantId: string | null;
+  schoolId: string | null;
+  subdomain: string | null;
+  jti: string | null;
+  exp: number | null;
+  iss: string | null;
+  aud: string | null;
+  phoneNumber?: string | null;
+  country?: string | null;
+  address?: string | null;
+  state?: string | null;
+  city?: string | null;
+  zipCode?: string | null;
+  about?: string | null;
+  isPublic?: boolean;
+};
+
+export type AuthUser = AuthenticatedUser | null;
+
+export type AuthState = {
+  isAuthenticated: boolean;
+  isInitialized: boolean;
+  user: AuthUser;
+};
+
+export type JWTContextType = {
+  isAuthenticated: boolean;
+  isInitialized: boolean;
+  user: AuthUser;
+  method: 'jwt';
+  login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string, firstName: string, lastName: string) => Promise<void>;
+  logout: () => Promise<void>;
+  getProfile: () => Promise<AuthUser>;
+  updateProfile: (fullName: string, email: string, avatarUrl?: string | null) => Promise<AuthUser>;
+};
+
+export type FirebaseContextType = {
+  isAuthenticated: boolean;
+  isInitialized: boolean;
+  user: AuthUser;
+  method: 'firebase';
+  login: (email: string, password: string) => Promise<UserCredential>;
+  register: (email: string, password: string, firstName: string, lastName: string) => Promise<void>;
+  logout: () => Promise<void>;
+};
+
+export type AWSCognitoContextType = {
+  isAuthenticated: boolean;
+  isInitialized: boolean;
+  user: AuthUser;
+  method: 'cognito';
+  login: (email: string, password: string) => Promise<unknown>;
+  register: (
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string
+  ) => Promise<unknown>;
+  logout: VoidFunction;
+};
+
+export type Auth0ContextType = {
+  isAuthenticated: boolean;
+  isInitialized: boolean;
+  user: AuthUser;
+  method: 'auth0';
+  login: () => Promise<void>;
+  logout: VoidFunction;
+};

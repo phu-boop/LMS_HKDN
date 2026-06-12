@@ -1,0 +1,40 @@
+import type { LearningStructureNode } from '@/@types/learningStructure';
+
+export const LEARNING_STRUCTURE_INITIAL: LearningStructureNode[] = [
+  {
+    id: 'program-k12',
+    tenantId: 'demo-tenant',
+    parentId: null,
+    nodeType: 'PROGRAM',
+    code: 'K12_CORE',
+    title: 'K12 Core',
+    sortOrder: 1,
+    status: 'ACTIVE',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 'program-stem',
+    tenantId: 'demo-tenant',
+    parentId: null,
+    nodeType: 'PROGRAM',
+    code: 'STEM_PLUS',
+    title: 'STEM Plus',
+    sortOrder: 2,
+    status: 'ACTIVE',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 'grade-9',
+    tenantId: 'demo-tenant',
+    parentId: 'program-k12',
+    nodeType: 'GRADE',
+    code: 'GRADE_9',
+    title: 'Khối 9',
+    sortOrder: 1,
+    status: 'ACTIVE',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+];

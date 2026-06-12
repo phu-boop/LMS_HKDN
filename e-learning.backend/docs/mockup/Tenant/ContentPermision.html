@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phân quyền Nội dung - STEM Education</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .modal-shadow { background: rgba(0, 0, 0, 0.4); }
+        
+        /* Tùy chỉnh thanh cuộn */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Animation cho Toggle Switch (Xanh Emerald) */
+        .toggle-checkbox:checked { right: 0; border-color: #10b981; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #10b981; }
+        .toggle-checkbox { right: 4px; z-index: 1; border-color: #e2e8f0; transition: all 0.3s; }
+        .toggle-label { background-color: #cbd5e1; transition: all 0.3s; }
+
+        /* Custom Tree Styling */
+        .tree-node.active { background-color: #ecfdf5; border-color: #34d399; }
+        .tree-node.active .node-title { color: #047857; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+<div class="flex min-h-screen">
+    <div class="w-64 bg-emerald-900 text-white p-6 hidden md:flex flex-col flex-shrink-0">
+        <div class="flex items-center gap-3 mb-8">
+            <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-emerald-900 font-bold">S</div>
+            <div class="text-xl font-bold tracking-wide">STEM Edu</div>
+        </div>
+        <nav class="space-y-3 flex-1">
+            <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-emerald-800 text-emerald-100">Dashboard</a>
+            <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-emerald-800 text-emerald-100">Cây Học Liệu</a>
+            <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-emerald-800 text-emerald-100">Quản lý Nội dung</a>
+            <a href="#" class="block py-2.5 px-4 rounded bg-emerald-600 text-white font-medium shadow-md shadow-emerald-900/50">Phân quyền Nội dung</a>
+            <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-emerald-800 text-emerald-100">Người dùng (Roles)</a>
+        </nav>
+    </div>
+
+    <div class="flex-1 p-8 overflow-hidden flex flex-col h-screen">
+        
+        <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800">Cấp phát Phân quyền (Permission Engine)</h1>
+                <p class="text-sm text-slate-500 mt-1">Quản lý ma trận truy cập: Ai được phép xem, tải và bình luận tài liệu nào.</p>
+            </div>
+            <button class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition shadow-sm shadow-emerald-200 flex items-center gap-2">
+                <span>💾 Lưu toàn bộ thay đổi</span>
+            </button>
+        </div>
+
+        <div class="flex flex-1 gap-6 overflow-hidden">
+            
+            <div class="w-1/3 bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden">
+                <div class="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+                    <h3 class="font-bold text-slate-700 text-sm">1. Chọn Thư mục / Học liệu</h3>
+                </div>
+                
+                <div class="p-4 border-b border-slate-100">
+                    <div class="relative">
+                        <input type="text" placeholder="Tìm tên bài học..." class="w-full pl-8 pr-3 py-1.5 border border-slate-300 rounded text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                        <span class="absolute left-2.5 top-1.5 text-slate-400 text-sm">🔍</span>
+                    </div>
+                </div>
+
+                <div class="overflow-y-auto flex-1 p-3 text-sm">
+                    <div class="space-y-1">
+                        <div class="tree-node border border-transparent rounded-lg p-2 hover:bg-slate-50 cursor-pointer flex items-center gap-2 transition">
+                            <span class="text-slate-400">▶</span>
+                            <span class="px-1.5 py-0.5 text-[10px] font-bold bg-purple-100 text-purple-700 rounded border border-purple-200">PROGRAM</span>
+                            <span class="node-title text-slate-700">Chương trình STEM 2026</span>
+                        </div>
+                        
+                        <div class="tree-node active border rounded-lg p-2 cursor-pointer flex items-center gap-2 transition ml-4">
+                            <span class="text-emerald-500">▼</span>
+                            <span class="px-1.5 py-0.5 text-[10px] font-bold bg-blue-100 text-blue-700 rounded border border-blue-200">GRADE</span>
+                            <span class="node-title">Khối 10</span>
+                        </div>
+                        
+                        <div class="ml-10 space-y-1 mt-1 border-l border-emerald-200 pl-2">
+                            <div class="tree-node border border-transparent rounded-lg p-2 hover:bg-slate-50 cursor-pointer flex items-center gap-2 transition">
+                                <span class="text-slate-400">▶</span>
+                                <span class="px-1.5 py-0.5 text-[10px] font-bold bg-amber-100 text-amber-700 rounded border border-amber-200">SUBJECT</span>
+                                <span class="node-title text-slate-600">Lập trình Cơ bản (Python)</span>
+                            </div>
+                            <div class="tree-node border border-transparent rounded-lg p-2 hover:bg-slate-50 cursor-pointer flex items-center gap-2 transition">
+                                <span class="text-slate-400">▶</span>
+                                <span class="px-1.5 py-0.5 text-[10px] font-bold bg-amber-100 text-amber-700 rounded border border-amber-200">SUBJECT</span>
+                                <span class="node-title text-slate-600">Thiết kế phần cứng (IoT)</span>
+                            </div>
+                        </div>
+
+                        <div class="tree-node border border-transparent rounded-lg p-2 hover:bg-slate-50 cursor-pointer flex items-center gap-2 transition ml-4 mt-1">
+                            <span class="text-slate-400">▶</span>
+                            <span class="px-1.5 py-0.5 text-[10px] font-bold bg-blue-100 text-blue-700 rounded border border-blue-200">GRADE</span>
+                            <span class="node-title text-slate-700">Khối 11</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="w-2/3 bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden relative">
+                
+                <div class="p-5 border-b border-slate-200 bg-white">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-800">2. Gán quyền cho: <span class="text-emerald-600">Khối 10</span></h2>
+                            <p class="text-xs text-slate-500 mt-1">Đang hiển thị danh sách các Trường/Cá nhân có quyền truy cập vào Khối 10.</p>
+                        </div>
+                        <button onclick="openGrantModal()" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm flex items-center gap-2">
+                            <span>+ Thêm Đối tượng cấp quyền</span>
+                        </button>
+                    </div>
+                    
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 flex gap-3 items-start">
+                        <span class="text-blue-500">ℹ️</span>
+                        <div class="text-xs text-blue-800">
+                            <strong class="block mb-0.5">Quy tắc Kế thừa (Inheritance Rule):</strong>
+                            Hệ thống áp dụng cơ chế kế thừa từ trên xuống. Các quyền cấp tại <span class="font-bold">Khối 10</span> sẽ tự động áp dụng cho toàn bộ Môn học và Bài học bên trong nó, trừ khi bị ghi đè.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="px-5 py-3 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                    <div class="flex gap-2">
+                        <button class="px-3 py-1.5 bg-emerald-100 text-emerald-800 rounded text-xs font-bold border border-emerald-200">Trường học (Schools)</button>
+                        <button class="px-3 py-1.5 bg-white text-slate-600 hover:bg-slate-100 rounded text-xs font-medium border border-slate-200 transition">Cá nhân (Users)</button>
+                    </div>
+                    <div class="relative">
+                        <input type="text" placeholder="Tìm trường trong danh sách..." class="pl-8 pr-3 py-1.5 border border-slate-300 rounded text-xs focus:ring-2 focus:ring-emerald-500 outline-none w-56">
+                        <span class="absolute left-2.5 top-1 text-slate-400 text-sm">🔍</span>
+                    </div>
+                </div>
+
+                <div class="overflow-y-auto flex-1">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-slate-50 sticky top-0 z-10 border-b border-slate-200">
+                            <tr>
+                                <th class="px-5 py-3 text-xs font-semibold text-slate-500 uppercase">Đối tượng (Grantee)</th>
+                                <th class="px-5 py-3 text-xs font-semibold text-slate-500 uppercase text-center w-28">View<br><span class="text-[10px] font-normal text-slate-400">(Xem)</span></th>
+                                <th class="px-5 py-3 text-xs font-semibold text-slate-500 uppercase text-center w-28">Download<br><span class="text-[10px] font-normal text-slate-400">(Tải xuống)</span></th>
+                                <th class="px-5 py-3 text-xs font-semibold text-slate-500 uppercase text-center w-28">Comment<br><span class="text-[10px] font-normal text-slate-400">(Bình luận)</span></th>
+                                <th class="px-5 py-3 text-xs font-semibold text-slate-500 uppercase text-right w-20">Xóa</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            
+                            <tr class="hover:bg-slate-50/80 transition">
+                                <td class="px-5 py-3">
+                                    <div class="font-medium text-slate-800 text-sm">THPT Lê Hồng Phong</div>
+                                    <div class="text-[11px] font-mono text-slate-500 mt-0.5">school_id: LHP-HCM</div>
+                                </td>
+                                <td class="px-5 py-3 text-center">
+                                    <div class="relative inline-block w-10 h-5 align-middle select-none">
+                                        <input type="checkbox" checked class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                                        <label class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer"></label>
+                                    </div>
+                                </td>
+                                <td class="px-5 py-3 text-center">
+                                    <div class="relative inline-block w-10 h-5 align-middle select-none">
+                                        <input type="checkbox" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                                        <label class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer"></label>
+                                    </div>
+                                </td>
+                                <td class="px-5 py-3 text-center">
+                                    <div class="relative inline-block w-10 h-5 align-middle select-none">
+                                        <input type="checkbox" checked class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                                        <label class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer"></label>
+                                    </div>
+                                </td>
+                                <td class="px-5 py-3 text-right">
+                                    <button class="text-slate-400 hover:text-red-500 transition px-2" title="Thu hồi quyền">✖</button>
+                                </td>
+                            </tr>
+
+                            <tr class="hover:bg-slate-50/80 transition">
+                                <td class="px-5 py-3">
+                                    <div class="font-medium text-slate-800 text-sm">THPT Chuyên Hà Nội - Amsterdam</div>
+                                    <div class="text-[11px] font-mono text-slate-500 mt-0.5">school_id: AMS-HN</div>
+                                </td>
+                                <td class="px-5 py-3 text-center">
+                                    <div class="relative inline-block w-10 h-5 align-middle select-none">
+                                        <input type="checkbox" checked class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                                        <label class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer"></label>
+                                    </div>
+                                </td>
+                                <td class="px-5 py-3 text-center">
+                                    <div class="relative inline-block w-10 h-5 align-middle select-none">
+                                        <input type="checkbox" checked class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                                        <label class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer"></label>
+                                    </div>
+                                </td>
+                                <td class="px-5 py-3 text-center">
+                                    <div class="relative inline-block w-10 h-5 align-middle select-none">
+                                        <input type="checkbox" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                                        <label class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer"></label>
+                                    </div>
+                                </td>
+                                <td class="px-5 py-3 text-right">
+                                    <button class="text-slate-400 hover:text-red-500 transition px-2" title="Thu hồi quyền">✖</button>
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="grantModal" class="fixed inset-0 hidden z-50 flex items-center justify-center">
+    <div class="fixed inset-0 modal-shadow backdrop-blur-sm transition-opacity" onclick="closeGrantModal()"></div>
+    
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg z-10 overflow-hidden">
+        <div class="p-5 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+            <h2 class="text-lg font-bold text-slate-800">Thêm Đối tượng Phân quyền</h2>
+            <button onclick="closeGrantModal()" class="text-slate-400 hover:text-slate-700 text-2xl leading-none">&times;</button>
+        </div>
+        
+        <div class="p-6 space-y-6">
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 flex gap-3 text-xs text-amber-800">
+                <span class="text-amber-500">⚡</span>
+                <p>Theo kiến trúc hệ thống, bạn chỉ được chọn cấp cho <strong>Toàn bộ Trường</strong> HOẶC cấp cho <strong>Từng Cá nhân cụ thể</strong> cho mỗi lần gán.</p>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Loại đối tượng nhận quyền</label>
+                <div class="flex gap-4">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="grantType" value="school" checked class="text-emerald-600 focus:ring-emerald-500">
+                        <span class="text-sm font-medium text-slate-800">Trường học (School)</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="grantType" value="user" class="text-emerald-600 focus:ring-emerald-500">
+                        <span class="text-sm font-medium text-slate-800">Cá nhân (User)</span>
+                    </label>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Tìm kiếm Đối tượng</label>
+                <select class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none bg-white">
+                    <option value="">-- Gõ tên trường để tìm kiếm --</option>
+                    <option value="1">THPT Chu Văn An</option>
+                    <option value="2">THPT Trần Phú</option>
+                </select>
+            </div>
+
+            <div class="border border-slate-200 rounded-lg p-4 bg-slate-50">
+                <p class="text-sm font-bold text-slate-800 mb-3">Quyền mặc định khi thêm</p>
+                <div class="flex justify-between px-2">
+                    <label class="flex items-center gap-2 text-sm cursor-pointer">
+                        <input type="checkbox" checked class="rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4"> View
+                    </label>
+                    <label class="flex items-center gap-2 text-sm cursor-pointer">
+                        <input type="checkbox" class="rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4"> Download
+                    </label>
+                    <label class="flex items-center gap-2 text-sm cursor-pointer">
+                        <input type="checkbox" checked class="rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4"> Comment
+                    </label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="p-5 border-t border-slate-200 bg-slate-50 flex gap-3 justify-end">
+            <button onclick="closeGrantModal()" class="px-5 py-2.5 border border-slate-300 bg-white text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition">Hủy</button>
+            <button onclick="closeGrantModal()" class="px-5 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition shadow-sm">Thêm vào Danh sách</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const grantModal = document.getElementById('grantModal');
+
+    function openGrantModal() {
+        grantModal.classList.remove('hidden');
+    }
+
+    function closeGrantModal() {
+        grantModal.classList.add('hidden');
+    }
+</script>
+
+</body>
+</html>

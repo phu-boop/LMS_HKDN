@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LMS - Identifier First Login</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f3f4f6; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        .logo { font-size: 24px; font-weight: bold; color: #1f2937; margin-bottom: 0.5rem; }
+        .subtitle { color: #6b7280; font-size: 14px; margin-bottom: 2rem; }
+        .input-group { margin-bottom: 1rem; text-align: left; }
+        .input-group label { display: block; margin-bottom: 0.5rem; font-size: 14px; font-weight: 500; color: #374151; }
+        .input-group input { width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
+        .btn { width: 100%; padding: 0.75rem; background-color: #2563eb; color: white; border: none; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background-color 0.2s; }
+        .btn:hover { background-color: #1d4ed8; }
+        .btn-outline { background-color: transparent; color: #4b5563; border: 1px solid #d1d5db; margin-top: 1rem; }
+        .btn-outline:hover { background-color: #f3f4f6; }
+        .hidden { display: none; }
+        .error { color: #dc2626; font-size: 14px; margin-bottom: 1rem; display: none; }
+        .user-badge { background: #eff6ff; color: #1e3a8a; padding: 0.5rem; border-radius: 4px; margin-bottom: 1.5rem; font-size: 14px; font-weight: 500; display: flex; align-items: center; justify-content: space-between; border: 1px solid #bfdbfe; }
+        .grid-workspaces { display: grid; grid-template-columns: 1fr; gap: 1rem; margin-top: 1.5rem; }
+        .workspace-card { padding: 1rem; border: 1px solid #e5e7eb; border-radius: 4px; cursor: pointer; transition: all 0.2s; text-align: left; }
+        .workspace-card:hover { border-color: #2563eb; box-shadow: 0 2px 4px rgba(37,99,235,0.1); }
+        .workspace-card h4 { margin: 0 0 0.5rem 0; color: #1f2937; }
+        .workspace-card p { margin: 0; font-size: 12px; color: #6b7280; }
+        
+        /* Demo Helper */
+        .demo-accounts { background: #fef3c7; padding: 1rem; border-radius: 4px; margin-top: 2rem; font-size: 12px; text-align: left; color: #92400e; }
+        .demo-accounts ul { margin: 0; padding-left: 1rem; }
+    </style>
+</head>
+<body>
+
+    <div class="card" id="mainCard">
+        <div id="branding">
+            <div class="logo" id="logoText">LMS</div>
+            <div class="subtitle" id="subTitle">Hệ thống quản lý học tập đa mảng</div>
+        </div>
+
+        <div id="errorMsg" class="error">Không tìm thấy email trong hệ thống.</div>
+
+        <div id="step1">
+            <div class="input-group">
+                <label>Email đăng nhập</label>
+                <input type="email" id="emailInput" placeholder="Ví dụ: name@school.edu" value="gv.pro@truong.edu">
+            </div>
+            <button class="btn" onclick="checkEmail()">Tiếp tục</button>
+        </div>
+
+        <div id="step2" class="hidden">
+            <div class="user-badge">
+                <span id="displayEmail">email@test.com</span>
+                <span style="cursor:pointer; color:#2563eb; font-size:12px;" onclick="goBack()">Thay đổi</span>
+            </div>
+            <div class="input-group">
+                <label>Mật khẩu</label>
+                <input type="password" id="passwordInput" placeholder="Nhập 123456" value="123456">
+            </div>
+            <button class="btn" onclick="login()">Đăng nhập</button>
+        </div>
+
+        <div id="step3_workspace" class="hidden">
+            <h3 style="margin-top: 0; font-size: 18px;">Chọn Không gian làm việc</h3>
+            <p style="font-size: 14px; color: #6b7280; margin-bottom: 0;">Bạn có quyền truy cập nhiều mảng. Hãy chọn mảng bạn muốn làm việc:</p>
+            <div class="grid-workspaces" id="workspaceList">
+                </div>
+            <button class="btn btn-outline" onclick="logout()">Đăng xuất</button>
+        </div>
+
+        <div id="step4_dashboard" class="hidden">
+            <div style="font-size: 48px; margin-bottom: 1rem;">🎉</div>
+            <h2 id="dashboardTitle">Dashboard</h2>
+            <p id="dashboardDesc">Bạn đã đăng nhập thành công!</p>
+            <button class="btn btn-outline" onclick="logout()">Đăng xuất</button>
+        </div>
+
+        <div class="demo-accounts" id="demoNotes">
+            <strong>Tài khoản Demo (Pass: 123456):</strong>
+            <ul>
+                <li><code>admin@daihoc.vn</code> (Admin tổng)</li>
+                <li><code>gv.stem@truong.edu</code> (Giáo viên chỉ dạy mảng STEM)</li>
+                <li><code>gv.pro@truong.edu</code> (Giáo viên dạy cả STEM, KNS, English)</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // MÔ PHỎNG DATABASE & API
+        const MOCK_DB = {
+            "admin@daihoc.vn": { type: "ADMIN", name: "Super Admin" },
+            "gv.stem@truong.edu": { 
+                type: "SINGLE_TENANT", 
+                tenant: { name: "STEM Education", desc: "Không gian Khoa học máy tính", color: "#16a34a" } 
+            },
+            "gv.pro@truong.edu": { 
+                type: "MULTI_TENANT", 
+                tenants: [
+                    { id: 't1', name: 'STEM Education', desc: 'Không gian Khoa học máy tính' },
+                    { id: 't2', name: 'English Plus', desc: 'Trung tâm Ngoại ngữ' },
+                    { id: 't3', name: 'KNS Institute', desc: 'Đào tạo Kỹ năng sống' }
+                ] 
+            }
+        };
+
+        let currentUser = null;
+
+        // Xử lý Step 1 -> Step 2
+        function checkEmail() {
+            const email = document.getElementById('emailInput').value.trim();
+            const errorMsg = document.getElementById('errorMsg');
+            
+            if (!email) return;
+
+            // Mô phỏng gọi API POST /api/auth/identify
+            const user = MOCK_DB[email];
+            
+            if (user) {
+                currentUser = user;
+                currentUser.email = email;
+                errorMsg.style.display = 'none';
+                
+                // Hiển thị Email đang đăng nhập
+                document.getElementById('displayEmail').innerText = email;
+
+                // THAY ĐỔI BRANDING (White-labeling)
+                const logoText = document.getElementById('logoText');
+                const subTitle = document.getElementById('subTitle');
+                
+                if (user.type === 'SINGLE_TENANT') {
+                    // Nếu chỉ thuộc 1 mảng -> Đổi logo ngay lập tức
+                    logoText.innerText = user.tenant.name;
+                    logoText.style.color = user.tenant.color;
+                    subTitle.innerText = "Đăng nhập vào không gian làm việc";
+                } else {
+                    // Trả về mặc định
+                    logoText.innerText = "LMS";
+                    logoText.style.color = "#1f2937";
+                    subTitle.innerText = "Hệ thống quản lý học tập đa mảng";
+                }
+
+                // Đổi màn hình
+                document.getElementById('step1').classList.add('hidden');
+                document.getElementById('demoNotes').classList.add('hidden');
+                document.getElementById('step2').classList.remove('hidden');
+            } else {
+                errorMsg.style.display = 'block';
+            }
+        }
+
+        // Xử lý Quay lại
+        function goBack() {
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('step1').classList.remove('hidden');
+            document.getElementById('demoNotes').classList.remove('hidden');
+            
+            // Trả về logo gốc
+            document.getElementById('logoText').innerText = "LMS";
+            document.getElementById('logoText').style.color = "#1f2937";
+            document.getElementById('subTitle').innerText = "Hệ thống quản lý học tập đa mảng";
+            currentUser = null;
+        }
+
+        // Xử lý Step 2 -> Tiếp theo (Login)
+        function login() {
+            const pass = document.getElementById('passwordInput').value;
+            if (pass !== '123456') {
+                alert("Sai mật khẩu. Hãy nhập 123456");
+                return;
+            }
+
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('branding').classList.add('hidden');
+
+            // Phân luồng sau khi Login thành công
+            if (currentUser.type === 'ADMIN') {
+                showDashboard("Super Admin Control Panel", "Quản lý toàn bộ hệ thống LMS");
+            } 
+            else if (currentUser.type === 'SINGLE_TENANT') {
+                showDashboard(currentUser.tenant.name + " Dashboard", "Chào mừng Giáo viên đến với không gian giảng dạy.");
+            } 
+            else if (currentUser.type === 'MULTI_TENANT') {
+                showWorkspaceSelector();
+            }
+        }
+
+        // Màn hình chọn Workspace cho Giáo viên nhiều mảng
+        function showWorkspaceSelector() {
+            const step3 = document.getElementById('step3_workspace');
+            const list = document.getElementById('workspaceList');
+            list.innerHTML = ''; // Clear cũ
+
+            currentUser.tenants.forEach(t => {
+                const card = document.createElement('div');
+                card.className = 'workspace-card';
+                card.innerHTML = `<h4>${t.name}</h4><p>${t.desc}</p>`;
+                card.onclick = () => {
+                    step3.classList.add('hidden');
+                    showDashboard(t.name + " Dashboard", "Bạn đã vào mảng làm việc thành công.");
+                };
+                list.appendChild(card);
+            });
+
+            step3.classList.remove('hidden');
+        }
+
+        // Màn hình Dashboard cuối cùng
+        function showDashboard(title, desc) {
+            document.getElementById('dashboardTitle').innerText = title;
+            document.getElementById('dashboardDesc').innerText = desc;
+            document.getElementById('step4_dashboard').classList.remove('hidden');
+        }
+
+        // Reset toàn bộ quy trình
+        function logout() {
+            document.getElementById('step3_workspace').classList.add('hidden');
+            document.getElementById('step4_dashboard').classList.add('hidden');
+            document.getElementById('branding').classList.remove('hidden');
+            
+            document.getElementById('emailInput').value = '';
+            document.getElementById('passwordInput').value = '123456';
+            goBack();
+        }
+    </script>
+</body>
+</html>
